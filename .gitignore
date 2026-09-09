@@ -1,0 +1,57 @@
+# Godot 4+ specific ignores
+.godot/
+
+# Godot-specific ignores
+*.translation
+
+# Imported resources (.import files are auto-generated)
+.import/
+
+# Mono-specific ignores (not used — GDScript project)
+.mono/
+data_*/
+mono_crash.*.json
+
+# Export artifacts
+*.apk
+*.aab
+*.ipa
+*.exe
+*.x86_64
+*.pck
+*.zip
+
+# Android export
+android/
+*.keystore
+
+# OS-generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment / secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Backend (future)
+node_modules/
+dist/
+*.log
+
+# Test output
+test_results/

@@ -1,0 +1,163 @@
+name: CI — Validate Project
+
+on:
+  push:
+    branches: ["*"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    name: Validate project structure
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify project.godot exists
+        run: |
+          if [ ! -f project.godot ]; then
+            echo "ERROR: project.godot not found"
+            exit 1
+          fi
+          echo "project.godot found"
+
+      - name: Verify project.godot is valid INI
+        run: |
+          python3 -c "
+          import configparser, sys
+          config = configparser.ConfigParser()
+          try:
+              config.read('project.godot')
+              name = config.get('application', 'config/name', fallback=None)
+              if name:
+                  print(f'Project name: {name}')
+              else:
+                  print('WARNING: No project name found')
+              print('project.godot parsed successfully')
+          except Exception as e:
+              print(f'ERROR parsing project.godot: {e}')
+              sys.exit(1)
+          "
+
+      - name: Verify required directories exist
+        run: |
+          DIRS=(
+            "src/autoload"
+            "src/domain"
+            "src/systems"
+            "src/net"
+            "src/world"
+            "src/entities"
+            "src/ui"
+            "src/data"
+            "server"
+            "assets"
+            "tests"
+            "docs"
+            "docs/decisions"
+          )
+          MISSING=0
+          for dir in "${DIRS[@]}"; do
+            if [ ! -d "$dir" ]; then
+              echo "MISSING: $dir"
+              MISSING=1
+            else
+              echo "OK: $dir"
+            fi
+          done
+          if [ $MISSING -eq 1 ]; then
+            echo "ERROR: Required directories missing"
+            exit 1
+          fi
+
+      - name: Verify required files exist
+        run: |
+          FILES=(
+            "README.md"
+            "CREDITS.md"
+            ".gitignore"
+            "project.godot"
+            "docs/00-blueprint.md"
+            "docs/01-architecture.md"
+            "docs/02-networking.md"
+            "docs/03-roadmap.md"
+            "docs/04-game-design.md"
+            "docs/05-assets-licenses.md"
+            "docs/06-security.md"
+            "docs/07-testing.md"
+          )
+          MISSING=0
+          for file in "${FILES[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "MISSING: $file"
+              MISSING=1
+            else
+              echo "OK: $file"
+            fi
+          done
+          if [ $MISSING -eq 1 ]; then
+            echo "ERROR: Required files missing"
+            exit 1
+          fi
+
+      - name: Scan for potential secrets
+        run: |
+          echo "Scanning for potential secrets..."
+          FOUND=0
+          # Check for common secret patterns in tracked files
+          if git grep -lI 'PRIVATE KEY' -- ':!.github/' 2>/dev/null; then
+            echo "WARNING: Possible private key found"
+            FOUND=1
+          fi
+          if git grep -lI 'password\s*=' -- '*.gd' '*.cfg' '*.ini' 2>/dev/null; then
+            echo "WARNING: Possible hardcoded password found"
+            FOUND=1
+          fi
+          if git grep -lI 'api_key\s*=' -- '*.gd' '*.cfg' '*.ini' 2>/dev/null; then
+            echo "WARNING: Possible API key found"
+            FOUND=1
+          fi
+          if [ -f ".env" ]; then
+            echo "WARNING: .env file is tracked!"
+            FOUND=1
+          fi
+          if [ $FOUND -eq 0 ]; then
+            echo "No secrets detected"
+          else
+            echo "WARNING: Review the files above for secrets"
+            exit 1
+          fi
+
+      - name: Verify no binary blobs
+        run: |
+          echo "Checking for large binary files..."
+          LARGE_FILES=$(find . -path ./.git -prune -o -type f -size +1M -print 2>/dev/null)
+          if [ -n "$LARGE_FILES" ]; then
+            echo "WARNING: Large files (>1MB) found:"
+            echo "$LARGE_FILES"
+            echo "Review whether these should be in the repository"
+          else
+            echo "No large binary files found"
+          fi
+
+      - name: Verify documentation cross-references
+        run: |
+          echo "Checking documentation links..."
+          BROKEN=0
+          for doc in docs/*.md; do
+            # Check for references to other docs files
+            refs=$(grep -oP 'docs/[a-zA-Z0-9_-]+\.md' "$doc" 2>/dev/null || true)
+            for ref in $refs; do
+              if [ ! -f "$ref" ]; then
+                echo "BROKEN LINK in $doc: $ref"
+                BROKEN=1
+              fi
+            done
+          done
+          if [ $BROKEN -eq 0 ]; then
+            echo "All documentation cross-references valid"
+          else
+            exit 1
+          fi
