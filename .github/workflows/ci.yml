@@ -23,7 +23,7 @@ jobs:
           fi
           echo "project.godot found"
 
-      - name: Verify project.godot is valid INI
+      - name: Verify project.godot is valid INI (structural check, not Godot runtime validation)
         run: |
           python3 -c "
           import configparser, sys
@@ -35,7 +35,8 @@ jobs:
                   print(f'Project name: {name}')
               else:
                   print('WARNING: No project name found')
-              print('project.godot parsed successfully')
+              print('project.godot parsed as valid INI')
+              print('NOTE: This verifies INI structure only. Full Godot validation requires the engine runtime (deferred to Phase 1).')
           except Exception as e:
               print(f'ERROR parsing project.godot: {e}')
               sys.exit(1)
@@ -102,62 +103,110 @@ jobs:
             exit 1
           fi
 
-      - name: Scan for potential secrets
+      - name: Scan for potential secrets in tracked text files
         run: |
-          echo "Scanning for potential secrets..."
+          echo "Scanning all tracked text files for potential secrets..."
           FOUND=0
-          # Check for common secret patterns in tracked files
+          # Check for private keys across all tracked text files (excluding CI config itself)
           if git grep -lI 'PRIVATE KEY' -- ':!.github/' 2>/dev/null; then
-            echo "WARNING: Possible private key found"
+            echo "FAIL: Possible private key found"
             FOUND=1
           fi
-          if git grep -lI 'password\s*=' -- '*.gd' '*.cfg' '*.ini' 2>/dev/null; then
-            echo "WARNING: Possible hardcoded password found"
+          # Check for hardcoded passwords across all tracked text files
+          if git grep -lI -E 'password\s*=' -- ':!.github/' ':!docs/' 2>/dev/null; then
+            echo "FAIL: Possible hardcoded password found"
             FOUND=1
           fi
-          if git grep -lI 'api_key\s*=' -- '*.gd' '*.cfg' '*.ini' 2>/dev/null; then
-            echo "WARNING: Possible API key found"
+          # Check for API keys across all tracked text files
+          if git grep -lI -E 'api[_-]?key\s*=' -- ':!.github/' ':!docs/' 2>/dev/null; then
+            echo "FAIL: Possible API key found"
             FOUND=1
           fi
+          # Check for tokens across all tracked text files
+          if git grep -lI -E '(secret|token)\s*=\s*["\x27][^\s]+' -- ':!.github/' ':!docs/' 2>/dev/null; then
+            echo "FAIL: Possible hardcoded token/secret found"
+            FOUND=1
+          fi
+          # Check for connection strings
+          if git grep -lI -E '(mysql|postgres|mongodb|redis)://[^\s]+@' -- ':!.github/' ':!docs/' 2>/dev/null; then
+            echo "FAIL: Possible connection string with credentials found"
+            FOUND=1
+          fi
+          # Check for .env files tracked
           if [ -f ".env" ]; then
-            echo "WARNING: .env file is tracked!"
+            echo "FAIL: .env file is tracked!"
             FOUND=1
           fi
           if [ $FOUND -eq 0 ]; then
-            echo "No secrets detected"
+            echo "No secrets detected (basic grep-based scan — not a substitute for dedicated tools like GitLeaks)"
           else
-            echo "WARNING: Review the files above for secrets"
+            echo "FAIL: Review the files above for secrets"
             exit 1
           fi
 
-      - name: Verify no binary blobs
+      - name: Check for large files (tiered policy)
         run: |
-          echo "Checking for large binary files..."
-          LARGE_FILES=$(find . -path ./.git -prune -o -type f -size +1M -print 2>/dev/null)
+          echo "Checking for large files..."
+          FAIL=0
+          WARN=0
+          # Hard fail: files over 50MB should never be in the repo
+          HUGE_FILES=$(find . -path ./.git -prune -o -type f -size +50M -print 2>/dev/null)
+          if [ -n "$HUGE_FILES" ]; then
+            echo "FAIL: Files over 50MB found (must use Git LFS or exclude):"
+            echo "$HUGE_FILES"
+            FAIL=1
+          fi
+          # Warning: files over 1MB deserve review
+          LARGE_FILES=$(find . -path ./.git -prune -o -type f -size +1M -not -size +50M -print 2>/dev/null)
           if [ -n "$LARGE_FILES" ]; then
-            echo "WARNING: Large files (>1MB) found:"
+            echo "WARNING: Files over 1MB found (review whether these belong in the repo or should use Git LFS):"
             echo "$LARGE_FILES"
-            echo "Review whether these should be in the repository"
-          else
-            echo "No large binary files found"
+            WARN=1
+          fi
+          if [ $FAIL -eq 1 ]; then
+            echo "FAIL: Remove or Git-LFS-track files over 50MB"
+            exit 1
+          elif [ $WARN -eq 0 ]; then
+            echo "No large files found"
           fi
 
       - name: Verify documentation cross-references
         run: |
-          echo "Checking documentation links..."
-          BROKEN=0
-          for doc in docs/*.md; do
-            # Check for references to other docs files
-            refs=$(grep -oP 'docs/[a-zA-Z0-9_-]+\.md' "$doc" 2>/dev/null || true)
-            for ref in $refs; do
-              if [ ! -f "$ref" ]; then
-                echo "BROKEN LINK in $doc: $ref"
-                BROKEN=1
-              fi
-            done
-          done
-          if [ $BROKEN -eq 0 ]; then
-            echo "All documentation cross-references valid"
-          else
-            exit 1
-          fi
+          echo "Checking documentation links across all markdown files..."
+          python3 -c "
+          import re, os, sys, glob
+
+          broken = []
+          checked = 0
+          # Check README.md, CREDITS.md, and all docs/**/*.md
+          md_files = glob.glob('docs/**/*.md', recursive=True)
+          md_files += [f for f in ['README.md', 'CREDITS.md'] if os.path.isfile(f)]
+
+          for md_file in md_files:
+              with open(md_file, 'r') as f:
+                  content = f.read()
+              # Match markdown links: [text](path) — only relative paths
+              for match in re.finditer(r'\[([^\]]*)\]\(([^)]+)\)', content):
+                  link_text, link_target = match.group(1), match.group(2)
+                  # Skip URLs, anchors, and mailto
+                  if link_target.startswith(('http://', 'https://', '#', 'mailto:')):
+                      continue
+                  # Strip anchor from path
+                  path = link_target.split('#')[0]
+                  if not path:
+                      continue
+                  # Resolve relative to the markdown file's directory
+                  base_dir = os.path.dirname(md_file)
+                  resolved = os.path.normpath(os.path.join(base_dir, path))
+                  checked += 1
+                  if not os.path.exists(resolved):
+                      broken.append(f'  BROKEN in {md_file}: [{link_text}]({link_target}) -> {resolved}')
+
+          if broken:
+              for b in broken:
+                  print(b)
+              print(f'FAIL: {len(broken)} broken link(s) found out of {checked} checked')
+              sys.exit(1)
+          else:
+              print(f'All {checked} documentation cross-references valid')
+          "

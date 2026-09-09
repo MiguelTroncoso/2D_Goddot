@@ -15,7 +15,7 @@
 
 - Top-down 2D perspective
 - Camera2D with smooth following
-- Viewport sized for mobile screens (portrait or landscape TBD — start landscape)
+- Viewport: 1280x720 landscape (decided — matches project.godot configuration)
 
 ## Art Style
 

@@ -45,6 +45,6 @@ Adopt a strict asset policy:
 ### Key Sources
 - Kenney (CC0) — safest, broadest library
 - game-icons.net (CC-BY 3.0) — best icon library, requires credit
-- LPC (CC-BY-SA/GPL) — best modular character system, viral license
+- LPC (CC-BY-SA/GPL) — best modular character system, share-alike license (review per-asset)
 - OpenGameArt (varies) — large library, check each asset
 - itch.io (varies) — indie marketplace, verify per-pack

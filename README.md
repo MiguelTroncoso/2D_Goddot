@@ -10,11 +10,17 @@ The identity, characters, world, and lore will be **entirely original**. Referen
 
 ## Scope
 
-This is an indie project. The goal is **not** to build a massive MMO from day one, but to produce a technically solid and fun **vertical slice** — a playable loop that demonstrates core mechanics end-to-end.
+This is an indie project. The goal is **not** to build a massive MMO from day one, but to produce a technically solid and fun **vertical slice** — built progressively across multiple phases.
 
 **Initial architecture target:** 10–20 concurrent players per zone/instance.
 
-A "vertical slice" means: one small map, one player class, basic movement, combat, enemies, loot, XP, and a complete gameplay loop — all running with authoritative server validation. It proves the tech works before scaling.
+The vertical slice is achieved incrementally:
+- **Phase 1** establishes offline movement and controls (NO combat, NO enemies, NO loot, NO XP, NO networking)
+- **Phase 2** adds the first offline gameplay loop (combat, enemies, loot, XP)
+- **Phase 3** introduces multiplayer with server authority
+- **Phase 4** delivers the full online RPG loop with authoritative validation
+
+The complete vertical slice — a playable online RPG loop with authoritative server validation — is the culmination of Phases 1 through 4, not a single phase.
 
 ## Stack
 
@@ -124,7 +130,7 @@ mmorpg-2d/
 | Phase | Name                     | Summary                                                     |
 |-------|--------------------------|-------------------------------------------------------------|
 | 0     | Foundation               | Repo structure, docs, CI, project config (CURRENT)          |
-| 1     | Vertical Slice Offline   | Small map, character, movement, camera, joystick, HUD       |
+| 1     | Offline Movement & Controls | Small map, player, movement, camera, joystick, HUD (offline only) |
 | 2     | Gameplay Offline         | Enemy, combat, damage, death, loot, XP, first game loop     |
 | 3     | Multiplayer Foundation   | Dedicated server, 2+ clients, sync, interpolation           |
 | 4     | RPG Online               | Authoritative combat, mobs, inventory, equipment             |

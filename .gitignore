@@ -21,7 +21,9 @@ mono_crash.*.json
 *.pck
 *.zip
 
-# Android export
+# Android export — Godot-generated build output (build/, .gradle/, etc.)
+# If custom Android configuration is needed (e.g., AndroidManifest overrides),
+# version those specific files explicitly rather than unignoring android/.
 android/
 *.keystore
 

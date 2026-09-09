@@ -23,9 +23,9 @@
 
 ---
 
-## Phase 1 — Vertical Slice Offline
+## Phase 1 — Offline Movement & Controls Foundation
 
-**Objective:** A single-player offline prototype with core movement and visuals.
+**Objective:** A single-player offline prototype with core movement, controls, and Android export.
 
 **Deliverables:**
 - Small TileMap level
@@ -33,14 +33,25 @@
 - Virtual joystick for Android touch input
 - Camera2D with smooth following
 - Basic collisions with environment
-- Minimal HUD (health bar placeholder)
+- Minimal HUD (placeholder)
+- Main scene assigned in project.godot
 - Android export working on real device
+- Initial domain tests where applicable
+
+**Explicitly NOT in Phase 1:**
+- No combat
+- No enemies
+- No loot
+- No XP or progression
+- No networking or multiplayer
+- No backend or database
 
 **Done when:**
 - Player moves in a small map with touch controls on Android
 - Camera follows smoothly
 - Collisions work correctly
 - APK runs on a real device
+- CI passes
 
 ---
 

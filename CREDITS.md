@@ -10,8 +10,8 @@ This file tracks every external asset used in the project.
 | CC0        | No             | Yes            | No          |
 | CC-BY 3.0  | Yes            | Yes            | No          |
 | CC-BY 4.0  | Yes            | Yes            | No          |
-| CC-BY-SA   | Yes            | Yes            | Yes (viral) |
-| GPL        | Yes            | Yes            | Yes (viral) |
+| CC-BY-SA   | Yes            | Yes            | Yes — see note below |
+| GPL        | Yes            | Yes            | Yes — see note below |
 | MIT        | Yes            | Yes            | No          |
 
 ## Asset Registry
@@ -59,5 +59,6 @@ Copy this template for each new asset:
 - NO asset is approved for production until registered here
 - Every asset must answer: Who made it? What license? Can we ship it commercially?
 - If any answer is unknown, the asset is **NOT approved**
-- CC-BY-SA and GPL assets require derivatives to carry the same license — evaluate impact before using
+- **CC-BY-SA:** Share-Alike obligations apply to adaptations and derivatives of the covered artwork under the applicable license terms. Using a CC-BY-SA sprite does not automatically require unrelated source code to become CC-BY-SA, but any modified or adapted version of the artwork itself must be shared under the same terms. Review the specific license version and your modifications before production use.
+- **GPL:** The exact asset, license version, dual-license options, modification status, and distribution method must all be reviewed before production use. Many LPC assets offer dual licensing (GPL + CC-BY-SA); the chosen license determines obligations. If implications are uncertain, the asset is NOT production-approved until reviewed.
 - Prefer CC0 for prototyping phases

@@ -37,7 +37,8 @@ The server is the single source of truth for all game state:
 ### Scanning
 - Review all diffs before committing
 - Search for accidental secret inclusion: passwords, tokens, keys
-- CI should include a basic secret scan step
+- CI includes a basic secret-pattern scan (grep-based detection of common patterns like private keys, hardcoded passwords, API keys, and tokens across tracked text files)
+- This is a basic safety net, not equivalent to dedicated secret-scanning software (e.g., GitLeaks, TruffleHog). Dedicated tooling is a hardening item for later phases
 
 ## Input Validation (Future Phases)
 
@@ -113,5 +114,6 @@ The server is the single source of truth for all game state:
 - [x] .gitignore excludes secrets and sensitive files
 - [x] No secrets in repository
 - [x] Security policy documented
-- [ ] CI secret scan (to be configured when tests exist)
+- [x] Basic CI secret-pattern scan enabled (grep-based, covers tracked text files)
+- [ ] Dedicated secret-scanning tooling (e.g., GitLeaks) — improvement for later phases
 - [ ] Pre-commit hook for secret detection (recommended for Phase 1)

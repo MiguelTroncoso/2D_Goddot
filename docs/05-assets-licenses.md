@@ -11,8 +11,8 @@
 | CC0        | No             | Yes            | No                    | Safest for any use        |
 | CC-BY 3.0  | Yes            | Yes            | No                    | Must credit author        |
 | CC-BY 4.0  | Yes            | Yes            | No                    | Must credit author        |
-| CC-BY-SA   | Yes            | Yes            | Yes                   | Viral — derivatives inherit license |
-| GPL        | Yes            | Yes            | Yes                   | Viral — code derivatives must be GPL |
+| CC-BY-SA   | Yes            | Yes            | Yes                   | Adaptations of the artwork must share under same terms (see below) |
+| GPL        | Yes            | Yes            | Yes                   | Review exact version, dual-license options, and distribution (see below) |
 | MIT        | Yes            | Yes            | No                    | Include license text      |
 | Custom     | Check          | Check          | Check                 | Read the full license     |
 
@@ -25,7 +25,7 @@ Before adding any asset, answer ALL of these:
 - [ ] Where was it downloaded from? (URL)
 - [ ] Does the license allow commercial use?
 - [ ] Does the license require attribution?
-- [ ] Does the license have share-alike/viral clauses?
+- [ ] Does the license have share-alike clauses? (If so, what scope do they cover?)
 - [ ] Is the asset entry added to CREDITS.md?
 
 If **any** answer is unknown → the asset is **NOT approved for production**.
@@ -90,3 +90,23 @@ art-src/         # Editable source files (.aseprite, .blend, .psd)
 ```
 
 Never commit editable source files without also committing the exported versions in `assets/`.
+
+## Share-Alike License Guidance
+
+### CC-BY-SA
+- Share-Alike obligations apply to **adaptations and derivatives of the covered artwork** under the applicable license terms
+- Using a CC-BY-SA sprite in your game does NOT automatically require unrelated GDScript source code to become CC-BY-SA
+- However, any **modified or adapted version** of the artwork itself must be shared under the same or a compatible license
+- The exact scope depends on the license version (3.0 vs 4.0) and what constitutes an "adaptation" under that version
+- When in doubt, treat the asset as NOT production-approved until reviewed
+
+### GPL (Common in LPC Assets)
+- Many LPC assets are dual-licensed (e.g., GPL 3.0 + CC-BY-SA 3.0) — you may choose which license to follow
+- GPL obligations depend on the exact version, how the asset is modified, and how the final product is distributed
+- Do NOT make broad legal conclusions about GPL scope in this project
+- For any GPL-licensed asset, document: exact license version, available dual-license options, whether the asset is modified, and the distribution method
+
+### Project Policy
+- If licensing implications of a specific asset are uncertain, the asset is **NOT production-approved** until independently reviewed
+- This project does not provide legal guarantees about license interpretations
+- CC0 remains the preferred license for prototyping to avoid these complexities entirely
