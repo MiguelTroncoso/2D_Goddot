@@ -27,6 +27,22 @@ This file tracks every external asset used in the project.
 | Attribution    | N/A                              |
 | Commercial Use | Yes                              |
 
+### Phase 1 geometric placeholders
+
+| Field | Value |
+|-------|-------|
+| Asset | Player polygons, map/grid/blocks, joystick and HUD shapes |
+| Author | Project team (created for this implementation) |
+| License | Original work; same source-license status as the project |
+| Source | Godot scene geometry and drawing code in `src/` |
+| Attribution | N/A |
+| Commercial Use | No external asset restrictions |
+
+No external art, asset packs, fonts, sounds or test addons were imported in Phase 1.
+Godot's built-in font is used. The engine is development tooling, not vendored in
+this repository. CI uses the official engine release and GitHub checkout action
+pinned to a SHA; no additional runtime dependencies were introduced.
+
 ---
 
 ## How to Add an Asset

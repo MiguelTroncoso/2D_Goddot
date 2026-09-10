@@ -1,6 +1,6 @@
 # Roadmap
 
-## Phase 0 — Foundation (CURRENT)
+## Phase 0 — Foundation (audited baseline)
 
 **Objective:** Create a professional, reproducible, auditable project foundation.
 
@@ -23,12 +23,19 @@
 
 ---
 
-## Phase 1 — Offline Movement & Controls Foundation
+## Phase 1 — Offline Movement & Controls Foundation (current)
 
 **Objective:** A single-player offline prototype with core movement, controls, and Android export.
 
+**Implementation status:** Offline scene, keyboard/touch input, collisions, camera,
+fixed HUD and native automated tests are implemented. Android Debug export is
+configured, but the attempted export is blocked by missing SDK/JDK/templates and
+debug signing configuration. Real-device testing and independent audit remain
+pending. The Android acceptance criteria below have **not** been satisfied.
+See [Android development](08-android-development.md) and [testing](07-testing.md).
+
 **Deliverables:**
-- Small TileMap level
+- Small static test map with original geometric placeholders (ADR-009)
 - Player character (CharacterBody2D) with 4-direction movement
 - Virtual joystick for Android touch input
 - Camera2D with smooth following

@@ -13,6 +13,7 @@ data_*/
 mono_crash.*.json
 
 # Export artifacts
+build/
 *.apk
 *.aab
 *.ipa
@@ -26,6 +27,8 @@ mono_crash.*.json
 # version those specific files explicitly rather than unignoring android/.
 android/
 *.keystore
+*.jks
+export_credentials.cfg
 
 # OS-generated files
 .DS_Store

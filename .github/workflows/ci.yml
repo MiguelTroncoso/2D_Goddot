@@ -2,9 +2,12 @@ name: CI — Validate Project
 
 on:
   push:
-    branches: ["*"]
+    branches: ["**"]
   pull_request:
     branches: [main]
+
+permissions:
+  contents: read
 
 jobs:
   validate:
@@ -13,7 +16,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
       - name: Verify project.godot exists
         run: |
@@ -22,25 +25,6 @@ jobs:
             exit 1
           fi
           echo "project.godot found"
-
-      - name: Verify project.godot is valid INI (structural check, not Godot runtime validation)
-        run: |
-          python3 -c "
-          import configparser, sys
-          config = configparser.ConfigParser()
-          try:
-              config.read('project.godot')
-              name = config.get('application', 'config/name', fallback=None)
-              if name:
-                  print(f'Project name: {name}')
-              else:
-                  print('WARNING: No project name found')
-              print('project.godot parsed as valid INI')
-              print('NOTE: This verifies INI structure only. Full Godot validation requires the engine runtime (deferred to Phase 1).')
-          except Exception as e:
-              print(f'ERROR parsing project.godot: {e}')
-              sys.exit(1)
-          "
 
       - name: Verify required directories exist
         run: |
@@ -210,3 +194,23 @@ jobs:
           else:
               print(f'All {checked} documentation cross-references valid')
           "
+
+  godot:
+    name: Godot 4.4 — parse, load and test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Download and verify official Godot 4.4-stable
+        working-directory: ${{ runner.temp }}
+        run: |
+          curl --fail --location --retry 3 --output godot.zip \
+            https://github.com/godotengine/godot-builds/releases/download/4.4-stable/Godot_v4.4-stable_linux.x86_64.zip
+          echo '3d56a7698bdf7027e41e5e0a930b6b93f89a204eb95b9cd0b8ae25180231994029e211984863a5ebb59759b3e602ae1d042e745ab1b7cbbfeda62652c3936f60  godot.zip' | sha512sum --check
+          unzip -q godot.zip -d godot-4.4
+          chmod +x godot-4.4/Godot_v4.4-stable_linux.x86_64
+
+      - name: Validate project and run native tests
+        run: python3 .github/scripts/validate_godot.py --godot "${{ runner.temp }}/godot-4.4/Godot_v4.4-stable_linux.x86_64"

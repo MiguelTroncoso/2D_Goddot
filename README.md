@@ -2,6 +2,28 @@
 
 A 2D top-down MMORPG for Android, built with Godot 4.4 and GDScript.
 
+## Play the Phase 1 prototype
+
+The current implementation is a small **offline** movement test with one player,
+keyboard/touch controls, collisions, camera and a fixed health HUD. Android export
+is configured; APK and real-device acceptance remain blocked by local tooling.
+Independent audit is still required before merge.
+
+Open `project.godot` with **Godot 4.4-stable** and press **F6** on
+`src/main.tscn`, or press **F5** to launch the configured main scene. Alternatively:
+
+```sh
+godot --path .
+```
+
+Move using WASD or arrow keys, or drag the lower-left joystick with a finger or
+mouse. Diagonal and combined inputs are capped to normal speed. The analog
+joystick has a dead zone, supports one owning finger and resets on release or
+focus loss. Health is a fixed visual placeholder, with no damage or healing.
+
+See [testing](docs/07-testing.md), [Android export](docs/08-android-development.md)
+and the [Phase 1 composition decision](docs/decisions/009-phase1-offline-composition.md).
+
 ## Vision
 
 An online multiplayer RPG with pixel-art aesthetics, open world exploration, PvE combat, inventory/crafting, and social systems — inspired by games like Pixel Knights Online, Heartwood Online, Darza's Dominion, Albion Online, and GrowStone Online.
@@ -32,7 +54,7 @@ The complete vertical slice — a playable online RPG loop with authoritative se
 | Server             | Godot Dedicated Server (headless) |
 | Networking         | ENet (authoritative server)       |
 | Future Backend     | Node.js / TypeScript + PostgreSQL |
-| Testing            | GUT (Godot Unit Test)             |
+| Testing            | Native Godot runner (Phase 1); GUT planned for domain rules |
 | CI                 | GitHub Actions                    |
 
 ## Architecture
@@ -61,6 +83,9 @@ data/       Resource files (.tres): items, enemies, skills, loot tables.
 ```
 
 **Fundamental rule:** `domain/` must NEVER depend on UI, networking, scenes, or Godot nodes. Core logic must be testable in isolation.
+
+The server/network/backend descriptions below are future architecture. Phase 1
+starts only the offline main scene and registers no autoloads.
 
 ### Authoritative Server
 
@@ -122,15 +147,15 @@ mmorpg-2d/
 │   └── main_server.gd           # Headless server entry point
 ├── assets/                      # Imported sprites, tilesets, audio, fonts
 ├── art-src/                     # Editable source files (.aseprite, .blend)
-└── tests/                       # GUT test scripts
+└── tests/                       # Native Phase 1 runner; GUT planned later
 ```
 
 ## Roadmap
 
 | Phase | Name                     | Summary                                                     |
 |-------|--------------------------|-------------------------------------------------------------|
-| 0     | Foundation               | Repo structure, docs, CI, project config (CURRENT)          |
-| 1     | Offline Movement & Controls | Small map, player, movement, camera, joystick, HUD (offline only) |
+| 0     | Foundation               | Repo structure, docs, CI, project config (audited baseline)          |
+| 1     | Offline Movement & Controls | Implemented offline prototype; Android device acceptance and audit pending |
 | 2     | Gameplay Offline         | Enemy, combat, damage, death, loot, XP, first game loop     |
 | 3     | Multiplayer Foundation   | Dedicated server, 2+ clients, sync, interpolation           |
 | 4     | RPG Online               | Authoritative combat, mobs, inventory, equipment             |
@@ -144,12 +169,16 @@ Full details: [docs/03-roadmap.md](docs/03-roadmap.md)
 
 ## Testing
 
-- **Framework:** GUT (Godot Unit Test)
-- **Priority:** `domain/` layer — pure logic, no scene dependencies
-- **Rule:** Never weaken a test to make it pass. A red test is valuable information.
-- **CI:** Tests run on every push via GitHub Actions
+Run the same native validation as CI (Python standard library plus Godot):
 
-Details: [docs/07-testing.md](docs/07-testing.md)
+```sh
+python3 .github/scripts/validate_godot.py --godot godot
+```
+
+This imports the project, checks every GDScript with Godot, loads the main scene
+and runs automated movement, collision, camera and touch-input checks. See
+[docs/07-testing.md](docs/07-testing.md) for the engine's known import warning,
+exact commands, limitations and manual validation checklist.
 
 ## Security
 
@@ -175,7 +204,7 @@ Details: [docs/05-assets-licenses.md](docs/05-assets-licenses.md)
 
 ```
 ChatGPT       →  Architecture, planning, technical direction
-Claude         →  Phase 0 foundation (this phase)
+Claude         →  Phase 0 foundation
 Codex          →  Primary implementation (Phase 1+)
 Antigravity    →  Independent audit (architecture, security, quality)
 Human          →  Final decisions and real-device testing
