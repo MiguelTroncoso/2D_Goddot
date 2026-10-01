@@ -27,12 +27,19 @@
 
 **Objective:** A single-player offline prototype with core movement, controls, and Android export.
 
-**Implementation status:** Offline scene, keyboard/touch input, collisions, camera,
-fixed HUD and native automated tests are implemented. Android Debug export is
-configured, but the attempted export is blocked by missing SDK/JDK/templates and
-debug signing configuration. Real-device testing and independent audit remain
-pending. The Android acceptance criteria below have **not** been satisfied.
-See [Android development](08-android-development.md) and [testing](07-testing.md).
+**Implementation status (auditado 2026-10-01, ver
+[revisión de Fase 1](phase-reviews/PHASE-1.md)):** offline scene, teclado, joystick
+táctil, colisiones, cámara, HUD fijo y tests nativos están implementados y en verde
+(`PHASE1_TEST_RESULT: 50 checks, 0 failures`). El export Android Debug **ya no está
+bloqueado**: `scripts/build_android.sh` resuelve Godot 4.4, JDK 17+, SDK de Android y
+plantillas, firma y verifica el APK, y en la auditoría produjo
+`build/android/mmorpg-2d-debug.apk` (54.220.359 bytes, `sha256`
+`9389115024cf5be60fa6c6e4f5c0e1762bda70d85ed2db185d1b5db4fe000948`, firma debug v2
+verificada). Queda **un único bloqueante**: la prueba física en un dispositivo
+Android del PO (`adb install -r`), junto con la medición de FPS, batería y safe area.
+Los criterios de aceptación Android de abajo siguen **sin cumplirse** hasta que esa
+prueba ocurra. Ver [Android development](08-android-development.md) y
+[testing](07-testing.md).
 
 **Deliverables:**
 - Small static test map with original geometric placeholders (ADR-009)
