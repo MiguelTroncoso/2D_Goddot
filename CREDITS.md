@@ -38,6 +38,18 @@ This file tracks every external asset used in the project.
 | Attribution | N/A |
 | Commercial Use | No external asset restrictions |
 
+### GUT — Godot Unit Test 9.4.0
+
+| Field          | Value |
+|----------------|-------|
+| Asset          | `addons/gut/` (framework de tests unitarios, incluye fuentes Anonymous Pro) |
+| Author         | Butch Wesley (bitwes) y colaboradores |
+| License        | MIT |
+| Source         | https://github.com/bitwes/Gut (tag `v9.4.0`) |
+| Attribution    | Requerida por MIT: se conserva el aviso de copyright y la licencia en `addons/gut/LICENSE.md` |
+| Commercial Use | Yes |
+| Notes          | Se fija 9.4.0 porque 9.6.1 no parsea en Godot 4.4-stable (ADR-011) |
+
 No external art, asset packs, fonts, sounds or test addons were imported in Phase 1.
 Godot's built-in font is used. The engine is development tooling, not vendored in
 this repository. CI uses the official engine release and GitHub checkout action

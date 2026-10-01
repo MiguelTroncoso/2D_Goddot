@@ -145,7 +145,8 @@ func _test_playable_scene() -> void:
 	joystick.show()
 	_touch(8, center + Vector2(200, 0), true)
 	_drag(8, center)
-	_expect(joystick.output == Vector2.ZERO, "touch must start inside joystick")
+	# El joystick es dinámico desde TASK-003.5: la zona activa es la mitad izquierda.
+	_expect(joystick.output == Vector2.ZERO, "un toque fuera de la zona de activación no mueve al jugador")
 	_touch(8, center, false)
 
 	player.position = Vector2(960, 640)

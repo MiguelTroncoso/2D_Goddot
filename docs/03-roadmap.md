@@ -73,6 +73,19 @@ prueba ocurra. Ver [Android development](08-android-development.md) y
 
 **Objective:** First complete game loop — fight, loot, level up.
 
+**Implementation status (2026-10-01, actualizado):** **en pausa**. El PO probó el APK de
+Fase 1 en su teléfono y el input táctil no funcionaba; la Fase 1 se reabre
+([ADR-010](decisions/010-phase1-closure-exception.md) enmendado) y TASK-003.5 corrige el
+joystick dinámico, la zona segura y añade verificación en dispositivo
+([regresión](phase-reviews/PHASE-1-REGRESSION.md)). No se apilan tareas de UI sobre una
+feature sin validar. El núcleo de dominio de TASK-003 sigue en pie:
+tipos de daño, mitigación, críticos, fórmula de daño con desglose auditable, curva de
+XP 1–150, `StatBlock` y `EnemyArchetype`. Suite GUT 9.4.0 en verde (52 tests, 378
+asserts) y cobertura de API del dominio del 100 % (gate ≥ 80 % en CI). Pendiente del
+resto de la fase: entidades de escena, IA, loot, HUD de combate y primer set T1. La
+prueba física de Fase 1 sigue diferida en [TASK-002](plans/TASK-002.md) por
+[ADR-010](decisions/010-phase1-closure-exception.md).
+
 **Deliverables:**
 - Enemy entity with basic AI (idle, chase, attack)
 - Combat system (attack, damage, death) — logic in domain/

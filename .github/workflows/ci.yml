@@ -72,6 +72,20 @@ jobs:
             "docs/05-assets-licenses.md"
             "docs/06-security.md"
             "docs/07-testing.md"
+            "docs/agent/PROMPT_MASTER.md"
+            "docs/agent/PHASE_TEMPLATE.md"
+            "docs/agent/RELEASE_AUDIT.md"
+            "docs/agent/BOOTSTRAP.md"
+            "docs/agent/SCHEMAS.md"
+            "docs/design/INDEX.md"
+            "docs/design/03-combat.md"
+            "docs/design/06-progression.md"
+            "docs/plans/TASK-001.md"
+            "docs/plans/TASK-002.md"
+            "docs/plans/TASK-003.md"
+            "docs/phase-reviews/PHASE-1.md"
+            "addons/gut/plugin.cfg"
+            "tools/domain_coverage.py"
           )
           MISSING=0
           for file in "${FILES[@]}"; do
@@ -192,8 +206,14 @@ jobs:
               print(f'FAIL: {len(broken)} broken link(s) found out of {checked} checked')
               sys.exit(1)
           else:
-              print(f'All {checked} documentation cross-references valid')
+            print(f'All {checked} documentation cross-references valid')
           "
+
+      - name: Verify touch input contract
+        run: python3 tools/check_input_contract.py
+
+      - name: Verify Android export contract
+        run: python3 tools/check_export_contract.py
 
   godot:
     name: Godot 4.4 — parse, load and test
@@ -214,3 +234,14 @@ jobs:
 
       - name: Validate project and run native tests
         run: python3 .github/scripts/validate_godot.py --godot "${{ runner.temp }}/godot-4.4/Godot_v4.4-stable_linux.x86_64"
+
+      - name: Domain tests (GUT)
+        run: |
+          GODOT="${{ runner.temp }}/godot-4.4/Godot_v4.4-stable_linux.x86_64"
+          "$GODOT" --headless --path . -s addons/gut/gut_cmdln.gd \
+            -gdir=res://tests/domain -gdir=res://tests/systems -gdir=res://tests/presentation \
+            -ginclude_subdirs -gexit | tee "${{ runner.temp }}/gut.log"
+          grep -q "All tests passed" "${{ runner.temp }}/gut.log"
+
+      - name: Domain API coverage (>= 80%)
+        run: python3 tools/domain_coverage.py --min 0.80

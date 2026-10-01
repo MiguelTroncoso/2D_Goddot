@@ -74,6 +74,21 @@ data/     → Resources .tres (items, clases, sets, eventos)
 - Nunca commitear secretos, keystores, credenciales ni binarios pesados.
 - 1 TASK = 1 ISSUE = 1 BRANCH = 1 PR.
 - FPS <30 en gama media → optimiza antes de avanzar.
+- **Ninguna feature de UI, input, orientación, safe area o rendimiento se declara
+  cerrada sin prueba física en dispositivo real** (o emulación táctil validada por el
+  PO). CI verde no sustituye la prueba de hardware en esas áreas (ADR-012).
+- Para esas features, la entrega incluye **APK con sha256 + comandos adb + qué observar
+  en pantalla**, y la tarea queda en estado `pending PO validation`.
+- **No se apilan tareas nuevas sobre features sin validar**: si una feature de UI/input
+  está pendiente, se corrige antes de seguir.
+
+## ESTADOS DE TAREA
+| Estado | Significado |
+|--------|-------------|
+| `done` | DoD cumplido y verificado por software |
+| `pending PO validation` | Implementado; falta confirmación física del PO (UI/input/rendimiento) |
+| `deferred` | Diferido con ADR que lo justifica y criterios de reapertura |
+| `blocked` | Dependencia externa que impide avanzar; se reporta y se detiene |
 
 ## FASES DEL ROADMAP
 
