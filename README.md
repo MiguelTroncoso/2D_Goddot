@@ -243,3 +243,65 @@ A task is "done" when:
 ## License
 
 To be determined. The project source code license will be decided before public release. All third-party assets retain their original licenses as documented in CREDITS.md.
+
+## Estado del proyecto
+
+| Fase | Estado | Evidencia |
+|------|--------|-----------|
+| Fase 1 — Movimiento offline + joystick + Android | ✅ **Cerrada y validada en dispositivo (2026-10-01)** | [PHASE-1.md](docs/phase-reviews/PHASE-1.md) · [ADR-010](docs/decisions/010-phase1-closure-exception.md) |
+| Fase 2 — Combate PvE | 🚧 En curso (núcleo de dominio listo) | [roadmap](docs/03-roadmap.md) · [TASK-003](docs/plans/TASK-003.md) |
+
+Tag de cierre de Fase 1: `fase-1-complete`. APKs debug y release en `build/android/`
+(ver [deploy.md](docs/deploy.md)).
+
+## Índice de documentación de diseño (`docs/design/`)
+
+Diseño completo del juego, escala 1–150 en 10 tramos. Punto de entrada recomendado:
+[INDEX.md](docs/design/INDEX.md) (índice, glosario y checklist de coherencia).
+
+| Documento | Contenido |
+|-----------|-----------|
+| [00-vision.md](docs/design/00-vision.md) | Pitch, pilares, público, diferenciadores, alcance |
+| [01-lore.md](docs/design/01-lore.md) | Astreva, eras, cosmología de la resonancia, facciones, NPCs |
+| [02-classes.md](docs/design/02-classes.md) | 5 clases, 7 habilidades cada una, curva 1–150 |
+| [03-combat.md](docs/design/03-combat.md) | Fórmulas de daño, estados, IA, ritmo de combate |
+| [04-world.md](docs/design/04-world.md) | 30 zonas, 10 instancias, 10 jefes de tramo, criaturas |
+| [05-economy.md](docs/design/05-economy.md) | Monedas, objetos, sets por tramo, crafteo, mercado |
+| [06-progression.md](docs/design/06-progression.md) | XP 1–150, atributos, talentos, reputación, endgame |
+| [07-social.md](docs/design/07-social.md) | Chat, party, gremios, PvP |
+| [08-ui-ux.md](docs/design/08-ui-ux.md) | Wireframes, onboarding, controles táctiles |
+| [09-art-audio.md](docs/design/09-art-audio.md) | Dirección visual, assets CC0 por fase, audio |
+| [10-monetization.md](docs/design/10-monetization.md) | F2P cosmético, principios y protecciones |
+| [11-mvp-scope.md](docs/design/11-mvp-scope.md) | Alcance del MVP, plan de 12 semanas |
+| [12-events.md](docs/design/12-events.md) | Eventos diarios, semanales y de temporada |
+| [13-shop.md](docs/design/13-shop.md) | Tienda premium, precios y rotaciones |
+| [INDEX.md](docs/design/INDEX.md) | Índice + checklist de coherencia (12 numéricas + 15 de sistemas) |
+
+## Índice del agente (`docs/agent/`)
+
+Instrucciones de trabajo autónomo y contratos del proyecto.
+
+| Documento | Contenido |
+|-----------|-----------|
+| [PROMPT_MASTER.md](docs/agent/PROMPT_MASTER.md) | Rol, alcance, arquitectura de capas, ciclo por tarea, reglas de autonomía y estados |
+| [BOOTSTRAP.md](docs/agent/BOOTSTRAP.md) | Plantilla de arranque de sesión |
+| [PHASE_TEMPLATE.md](docs/agent/PHASE_TEMPLATE.md) | Plantilla de revisión de fase |
+| [RELEASE_AUDIT.md](docs/agent/RELEASE_AUDIT.md) | Auditoría final de release v1.0 |
+| [SCHEMAS.md](docs/agent/SCHEMAS.md) | Esquema de datos del dominio y de los futuros `.tres` |
+
+## Planes, revisiones y decisiones
+
+- [Roadmap](docs/03-roadmap.md) · [Testing](docs/07-testing.md) · [Android](docs/08-android-development.md) · [Deploy](docs/deploy.md)
+- Planes: [TASK-001](docs/plans/TASK-001.md) · [TASK-002](docs/plans/TASK-002.md) · [TASK-003](docs/plans/TASK-003.md) · [TASK-003.5](docs/plans/TASK-003.5.md)
+- Revisiones: [PHASE-1](docs/phase-reviews/PHASE-1.md) · [regresión de input](docs/phase-reviews/PHASE-1-REGRESSION.md) · [evidencia en dispositivo](docs/phase-reviews/evidence/)
+- Decisiones: [ADR-001…012](docs/decisions/)
+
+## Herramientas de verificación
+
+```sh
+python3 .github/scripts/validate_godot.py --godot <godot>   # import, parseo y checks nativos
+python3 tools/domain_coverage.py                            # cobertura de API >= 80 %
+python3 tools/check_input_contract.py                       # escenas y flags de input táctil
+python3 tools/check_export_contract.py                      # preset de exportación y overlay en release
+bash scripts/build_android.sh [--release]                   # APK firmado y verificado
+```

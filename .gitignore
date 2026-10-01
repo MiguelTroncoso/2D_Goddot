@@ -14,6 +14,10 @@ mono_crash.*.json
 
 # Export artifacts
 build/
+
+# Copias de conflicto de iCloud Drive / Finder ("archivo 2.gd", "carpeta 3/")
+* [0-9].*
+* [0-9]/
 *.apk
 *.aab
 *.ipa

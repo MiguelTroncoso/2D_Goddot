@@ -75,6 +75,20 @@ func test_el_diagnostico_contabiliza_eventos() -> void:
 	assert_true(String(joystick.ultimo_evento).begins_with("Screen"))
 
 
+func test_overlay_de_diagnostico_esta_disponible_en_debug() -> void:
+	var script_overlay = load("res://src/ui/debug_overlay.gd")
+	assert_not_null(script_overlay, "el overlay de diagnóstico debe existir")
+	assert_true(script_overlay.habilitado(), "en un build de desarrollo el overlay se habilita")
+	assert_true(script_overlay.escena_disponible(), "la escena del overlay debe existir en debug")
+	var main := await _montar()
+	var hud = main.get_node("UI/HUD")
+	var encontrados := 0
+	for hijo in hud.get_children():
+		if hijo.get_script() == script_overlay:
+			encontrados += 1
+	assert_eq(encontrados, 1, "el HUD instala el overlay solo cuando está habilitado")
+
+
 func _tocar(indice: int, posicion: Vector2, local := true) -> void:
 	var evento := InputEventScreenTouch.new()
 	evento.index = indice

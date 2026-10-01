@@ -1,6 +1,7 @@
 # REVISIÓN DE FASE 1 — Movimiento offline + joystick + export Android
 
-> Fecha de auditoría: 2026-10-01 · Rama auditada: `feature/phase1-offline-movement-controls`
+> Fecha de auditoría: 2026-10-01 · **Estado final: ✅ CERRADA con validación física (TASK-005)**
+> Rama auditada: `feature/phase1-offline-movement-controls` (integrada en `main`)
 > Referencias: [roadmap](../03-roadmap.md), [checklist INDEX](../design/INDEX.md), [ADR-004](../decisions/004-android-first.md), [ADR-009](../decisions/009-phase1-offline-composition.md)
 
 ## Estado actual
@@ -81,3 +82,27 @@ Cerrar el DoD de Fase 1 dejando el build de Android reproducible por script y ve
 - No se avanzó a Fase 2: el DoD de Fase 1 sigue abierto por el bloqueante externo (dispositivo).
 - No se introdujeron decisiones ambiguas de GDD: no aplica en esta fase.
 - FPS: sin datos de dispositivo; no se declara cumplido.
+
+## Cierre final (TASK-005, 2026-10-01)
+
+**Estado: ✅ 100 % — DoD de Fase 1 cumplido con validación física.**
+
+| Métrica | Valor final | Evidencia |
+|---------|-------------|-----------|
+| Prueba en dispositivo | ✅ realizada por el PO | [ADR-010 enmendado](../decisions/010-phase1-closure-exception.md) |
+| FPS en el teléfono | **117–120** (objetivo ≥30) | [captura 1](evidence/device-01-joystick-izquierda.jpg) · [captura 2](evidence/device-02-joystick-arriba-derecha.jpg) |
+| Input táctil | ✅ `joy (-0.98, 0.19) → vel (-235, 46)`; `joy (0.71, -0.71) → vel (170, -169)` | [captura 1](evidence/device-01-joystick-izquierda.jpg) · [captura 2](evidence/device-02-joystick-arriba-derecha.jpg) |
+| Safe area | ✅ `safe L76 T0 R0 B0` (inset real de 76 px aplicado) | captura 1 |
+| Escala del dispositivo | `vp 1600x720` sobre `win 2712x1220` (×1,695) | captura 1 (valida el fix de coordenadas relativas) |
+| Tests nativos | 50 checks, 0 fallos | `PHASE1_TEST_RESULT` |
+| Tests GUT | 68 tests, 434 asserts, 0 fallos | `addons/gut` en CI |
+| Cobertura de API (domain + systems) | 100 % (67/67), gate ≥80 % | `tools/domain_coverage.py` |
+| APK debug | 54.296.909 bytes · sha256 `f35aa326c88ce7cf5e6740352121c201618b52af13123ce1d0408dee4f0780eb` | `scripts/build_android.sh` |
+| APK release | 51.376.129 bytes · sha256 `9450b43ebc7bb3b49c2fbb0489443d39594abff2f04e044cd6479676337d6e14` | `scripts/build_android.sh --release` |
+
+**Lección aprendida:** el cierre se declaró con un build que nunca se había probado en
+hardware, y el defecto real estaba en el **empaquetado** (`export_filter="scenes"` dejaba
+fuera `src/systems/`), no en la lógica. Queda como regla permanente en
+[ADR-012](../decisions/012-ui-input-requires-device-validation.md): nada de UI, input,
+orientación, safe area o rendimiento se cierra sin prueba física, y todo entregable de
+esas áreas verifica el **contenido del artefacto**, no solo el código fuente.

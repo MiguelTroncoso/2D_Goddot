@@ -2,8 +2,8 @@
 # Build Android reproducible para 2D_Goddot (Godot 4.4).
 #
 # Uso:
-#   bash scripts/build_android.sh                 # preset "Android Debug"
-#   PRESET="Android Release" bash scripts/build_android.sh
+#   bash scripts/build_android.sh            # APK debug (overlay de diagnóstico incluido)
+#   bash scripts/build_android.sh --release  # APK release (sin overlay, firma de release)
 #
 # Variables opcionales:
 #   GODOT_BIN     Ruta al ejecutable de Godot 4.4
@@ -18,7 +18,34 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-PRESET="${PRESET:-Android Debug}"
+CONFIG="debug"
+case "${1:-}" in
+  --release) CONFIG="release" ;;
+  --debug|"") : ;;
+  *) echo "[build-android] ERROR: opción desconocida '$1' (usa --release o nada)" >&2; exit 2 ;;
+esac
+
+if [[ "$CONFIG" == "release" ]]; then
+  PRESET="${PRESET:-Android Release}"
+  : "${OUTPUT:=build/android/mmorpg-2d-release.apk}"
+  # Credenciales de firma de release: SIEMPRE fuera del repositorio.
+  ENV_RELEASE="$HOME/.android/mmorpg2d-release.env"
+  if [[ -f "$ENV_RELEASE" ]]; then
+    # shellcheck disable=SC1090
+    source "$ENV_RELEASE"
+  fi
+  if [[ -z "${GODOT_ANDROID_KEYSTORE_RELEASE_PATH:-}" ]]; then
+    echo "[build-android] ERROR: release requiere firma. Crea $ENV_RELEASE con" >&2
+    echo "  GODOT_ANDROID_KEYSTORE_RELEASE_PATH=/ruta/fuera/del/repo/keystore" >&2
+    echo "  GODOT_ANDROID_KEYSTORE_RELEASE_USER=<alias>" >&2
+    echo "  GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD=<password>" >&2
+    exit 1
+  fi
+  export GODOT_ANDROID_KEYSTORE_RELEASE_PATH GODOT_ANDROID_KEYSTORE_RELEASE_USER GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD
+else
+  PRESET="${PRESET:-Android Debug}"
+  : "${OUTPUT:=build/android/mmorpg-2d-debug.apk}"
+fi
 ANDROID_HOME="${ANDROID_HOME:-$HOME/Library/Android/sdk}"
 
 log() { printf '[build-android] %s\n' "$*"; }
@@ -86,6 +113,12 @@ TEMPLATE_DIR="$HOME/Library/Application Support/Godot/export_templates/4.4.stabl
 [[ -f "$HOME/.android/debug.keystore" ]] || log "aviso: no hay ~/.android/debug.keystore; Godot intentará crearlo"
 
 # ---------------------------------------------------------------- Contrato de input
+# Evita builds sobre un árbol con copias de conflicto de iCloud/Finder.
+if command -v python3 >/dev/null 2>&1; then
+  python3 "$ROOT/tools/check_workspace_clean.py" \
+    || fail "hay copias de conflicto en el proyecto (ejecuta: python3 tools/check_workspace_clean.py --mover)"
+fi
+
 # Evita publicar un APK si el editor reescribió project.godot y se perdieron los
 # flags de input táctil (regresión TASK-003.5).
 if command -v python3 >/dev/null 2>&1; then
@@ -95,14 +128,19 @@ if command -v python3 >/dev/null 2>&1; then
 fi
 
 # ---------------------------------------------------------------- Export
-OUTPUT="${OUTPUT:-build/android/mmorpg-2d-debug.apk}"
 mkdir -p "$(dirname "$OUTPUT")"
 rm -f "$OUTPUT" "$OUTPUT.idsig"
 
-log "exportando preset '$PRESET' → $OUTPUT"
+EXPECTED_OVERLAY="presente"
+if [[ "$CONFIG" == "release" ]]; then EXPECTED_OVERLAY="ausente"; fi
+log "exportando preset '$PRESET' (overlay de diagnóstico: $EXPECTED_OVERLAY) → $OUTPUT"
 LOG="build/android/export-$(date +%Y%m%d-%H%M%S).log"
 set +e
-"$GODOT" --headless --path "$ROOT" --export-debug "$PRESET" "$OUTPUT" >"$LOG" 2>&1
+if [[ "$CONFIG" == "release" ]]; then
+  "$GODOT" --headless --path "$ROOT" --export-release "$PRESET" "$OUTPUT" >"$LOG" 2>&1
+else
+  "$GODOT" --headless --path "$ROOT" --export-debug "$PRESET" "$OUTPUT" >"$LOG" 2>&1
+fi
 EXPORT_STATUS=$?
 set -e
 if [[ $EXPORT_STATUS -ne 0 || ! -f "$OUTPUT" ]]; then
@@ -123,6 +161,12 @@ if command -v unzip >/dev/null 2>&1; then
     printf '%s' "$LISTADO" | grep -q "$requerido" \
       || fail "el APK no contiene '$requerido'. Revisa export_filter en export_presets.cfg (debe ser all_resources)"
   done
+  if [[ "$CONFIG" == "release" ]] && printf '%s' "$LISTADO" | grep -q "debug_overlay"; then
+    fail "el APK de release incluye el overlay de diagnóstico (revisa exclude_filter del preset)"
+  fi
+  if [[ "$CONFIG" == "debug" ]] && ! printf '%s' "$LISTADO" | grep -q "debug_overlay"; then
+    log "aviso: el APK debug no incluye debug_overlay (el overlay no aparecerá)"
+  fi
   if printf '%s' "$LISTADO" | grep -q "assets/addons/gut/"; then
     log "aviso: el APK incluye addons/gut (revisar exclude_filter: no debería viajar a producción)"
   fi
