@@ -28,6 +28,22 @@ Configure a local development signing key there (or the documented
 `GODOT_ANDROID_KEYSTORE_DEBUG_*` environment variables). Keep the signing material
 outside the repository. Never add release credentials to this development preset.
 
+### Build reproducible (recomendado)
+
+Desde la raíz del repositorio, un solo comando. El script resuelve Godot 4.4, exige
+**JDK 17 o superior**, valida el SDK y las plantillas, exporta, firma y verifica el APK,
+y termina imprimiendo tamaño y `sha256`:
+
+```sh
+bash scripts/build_android.sh
+```
+
+Variables opcionales: `GODOT_BIN`, `JAVA_HOME`, `ANDROID_HOME`, `PRESET` y `OUTPUT`.
+El script falla con un mensaje explícito si falta cualquier dependencia, en lugar de
+producir un APK incompleto.
+
+### Build manual
+
 From the repository root, with `godot` pointing to the pinned engine:
 
 ```sh
@@ -52,10 +68,28 @@ Vulkan support and performance also need a real-device check.
 
 ## Implementation environment result
 
-**ANDROID EXPORT: BLOCKED BY ENVIRONMENT.** The real Godot export command was
-attempted and exited 1: 4.4 Android templates, JDK 17, Android SDK tools and a
-configured debug signing key were unavailable. Godot recognized the Android Debug
-preset, but no APK was produced. No Android device test has been executed.
+**ANDROID EXPORT: OK (local, 2026-10-01).** El bloqueo anterior era de entorno y ya
+está resuelto en esta máquina: Godot `4.4.stable.official.4c311cbee`, plantillas
+`4.4.stable`, Android SDK con build-tools 34.0.0 y `JAVA_HOME` en
+`/opt/homebrew/opt/openjdk/libexec/openjdk.jdk/Contents/Home` (el `java` del sistema
+sigue siendo 1.8 y **no** debe usarse). Resultado de la auditoría:
+
+| Evidencia | Valor |
+|-----------|-------|
+| APK | `build/android/mmorpg-2d-debug.apk` |
+| Tamaño | 54.220.359 bytes (51,7 MB) |
+| `sha256` | `9389115024cf5be60fa6c6e4f5c0e1762bda70d85ed2db185d1b5db4fe000948` |
+| Firma | Debug v2 verificada con `apksigner` |
+| Arquitecturas | `armeabi-v7a`, `arm64-v8a` |
+| Tests nativos | `PHASE1_TEST_RESULT: 50 checks, 0 failures` |
+
+Nota: el APK es reproducible **en procedimiento** (mismo preset y mismas entradas),
+pero no byte a byte: el empaquetado de Godot inserta timestamps, por lo que el
+`sha256` cambia entre builds con el mismo tamaño y contenido.
+
+**Pendiente único:** prueba física en dispositivo Android (`adb install -r`), con
+verificación de FPS sostenido ≥30, batería, safe area y cutouts. Ver
+[revisión de Fase 1](phase-reviews/PHASE-1.md).
 
 CI validates engine import, scripts, main-scene startup and native tests. It does
 not install Android tooling, build an APK or claim device validation. Phase 1's
