@@ -27,24 +27,26 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DOMAIN_DIR = ROOT / "src" / "domain"
-TESTS_DIR = ROOT / "tests" / "domain"
+SOURCE_DIRS = [ROOT / "src" / "domain", ROOT / "src" / "systems"]
+TESTS_DIRS = [ROOT / "tests" / "domain", ROOT / "tests" / "systems"]
 
 FUNC_RE = re.compile(r"^(?:static\s+)?func\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(", re.MULTILINE)
 IDENT_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 
 
-def funciones_por_archivo(directorio: Path) -> dict[Path, list[str]]:
+def funciones_por_archivo(directorios: list[Path]) -> dict[Path, list[str]]:
     resultado: dict[Path, list[str]] = {}
-    for archivo in sorted(directorio.rglob("*.gd")):
-        resultado[archivo] = FUNC_RE.findall(archivo.read_text(encoding="utf-8"))
+    for directorio in directorios:
+        for archivo in sorted(directorio.rglob("*.gd")):
+            resultado[archivo] = FUNC_RE.findall(archivo.read_text(encoding="utf-8"))
     return resultado
 
 
-def identificadores_de_tests(directorio: Path) -> set[str]:
+def identificadores_de_tests(directorios: list[Path]) -> set[str]:
     encontrados: set[str] = set()
-    for archivo in sorted(directorio.rglob("*.gd")):
-        encontrados.update(IDENT_RE.findall(archivo.read_text(encoding="utf-8")))
+    for directorio in directorios:
+        for archivo in sorted(directorio.rglob("*.gd")):
+            encontrados.update(IDENT_RE.findall(archivo.read_text(encoding="utf-8")))
     return encontrados
 
 
@@ -54,14 +56,12 @@ def main() -> int:
     parser.add_argument("--verbose", action="store_true", help="lista cada función sin cobertura")
     args = parser.parse_args()
 
-    if not DOMAIN_DIR.is_dir():
-        print(f"FAIL: no existe {DOMAIN_DIR.relative_to(ROOT)}")
-        return 1
-    if not TESTS_DIR.is_dir():
-        print(f"FAIL: no existe {TESTS_DIR.relative_to(ROOT)}")
-        return 1
+    for directorio in SOURCE_DIRS + TESTS_DIRS:
+        if not directorio.is_dir():
+            print(f"FAIL: no existe {directorio.relative_to(ROOT)}")
+            return 1
 
-    referencias = identificadores_de_tests(TESTS_DIR)
+    referencias = identificadores_de_tests(TESTS_DIRS)
     publicas_totales = 0
     publicas_cubiertas = 0
     privadas_totales = 0
@@ -69,7 +69,7 @@ def main() -> int:
 
     print(f"{'archivo':<48}{'cubiertas':>10}{'total':>7}{'%':>8}")
     print("-" * 73)
-    for archivo, funciones in funciones_por_archivo(DOMAIN_DIR).items():
+    for archivo, funciones in funciones_por_archivo(SOURCE_DIRS).items():
         publicas = [f for f in funciones if not f.startswith("_")]
         privadas = [f for f in funciones if f.startswith("_")]
         cubiertas = [f for f in publicas if f in referencias]
@@ -86,12 +86,12 @@ def main() -> int:
 
     print("-" * 73)
     if publicas_totales == 0:
-        print("FAIL: no se encontraron funciones públicas en src/domain")
+        print("FAIL: no se encontraron funciones públicas en src/domain ni src/systems")
         return 1
 
     cobertura = publicas_cubiertas / publicas_totales
     print(
-        f"API del dominio: {publicas_cubiertas}/{publicas_totales} funciones públicas con test "
+        f"API de dominio+sistemas: {publicas_cubiertas}/{publicas_totales} funciones públicas con test "
         f"({cobertura * 100:.1f} %) · {privadas_totales} funciones privadas fuera del cálculo"
     )
     if args.verbose and faltantes:

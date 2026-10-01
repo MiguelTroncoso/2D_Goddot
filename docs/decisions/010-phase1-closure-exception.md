@@ -1,7 +1,11 @@
 # ADR-010: Cierre de Fase 1 con la prueba física diferida
 
 ## Status
-Accepted — 2026-10-01
+
+**Amended — 2026-10-01: Fase 1 REABIERTA.** La prueba física diferida reveló que el
+input táctil no funcionaba en dispositivo (`docs/phase-reviews/PHASE-1-REGRESSION.md`).
+La excepción queda revocada: Fase 1 no está cerrada y **no se apilan tareas de UI/input
+sobre ella** hasta la validación del PO ([ADR-012](012-ui-input-requires-device-validation.md)).
 
 ## Context
 
@@ -70,3 +74,23 @@ Condiciones de la excepción:
 
 - `docs/plans/TASK-002.md` — prueba física en dispositivo.
 - `docs/phase-reviews/PHASE-1.md` — métricas pendientes de dispositivo (FPS, batería, safe area).
+
+## Amendment (2026-10-01) — Por qué la excepción fue un error
+
+El razonamiento original asumía que "todo lo verificable por software" cubría la fase.
+No era así: la fase consistía en **una sola** funcionalidad, el movimiento táctil, y su
+única verificación válida era el hardware. El APK existía, estaba firmado, los 50 checks
+pasaban y CI estaba verde — y aun así el juego no se podía jugar.
+
+Lecciones incorporadas como reglas en [ADR-012](012-ui-input-requires-device-validation.md):
+
+1. Una excepción de validación solo es aceptable si **queda trabajo verificable e
+   independiente** que no dependa del elemento diferido. Aquí no lo había.
+2. Los tests que inyectan eventos en coordenadas locales no cubren el camino del sistema
+   operativo; hace falta al menos un caso con coordenadas de pantalla.
+3. Todo control táctil debe ser tolerante a errores de escala (zona de activación +
+   desplazamiento relativo), no depender de un *hit test* geométrico exacto.
+
+**Criterio de reapertura y cierre de Fase 1:** el fix se considera cerrado solo cuando
+el PO confirme en su dispositivo los cinco puntos de
+[PHASE-1-REGRESSION.md](../phase-reviews/PHASE-1-REGRESSION.md) §5.
