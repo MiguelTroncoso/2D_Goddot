@@ -145,7 +145,7 @@ Cada clase tiene un **primario** (+2 por nivel, automático), un **secundario** 
 ```
 Vida_max  = 120 + 26,0 × (nivel − 1) + 0,090 × (nivel − 1)²   # nv 15: 502 · nv 75: 2.535 · nv 150: 5.992
 POD_base  =  10 +  1,9 × (nivel − 1) + 0,006 × (nivel − 1)²   # nv 15:  38 · nv 75:   184 · nv 150:   426
-DEF_base  =  15 +  2,4 × (nivel − 1) + 0,010 × (nivel − 1)²   # nv 15:  51 · nv 75:   262 · nv 150:   595
+DEF_base  =  15 +  2,4 × (nivel − 1) + 0,010 × (nivel − 1)²   # nv 15:  51 · nv 75:   247 · nv 150:   595
 Reserva_max = 100 + 2 × Resonancia (atributo, no nivel)
 ```
 

@@ -48,10 +48,13 @@ daño_final  = daño_base × (1 − mitigación) × (1 + bono_negativo) × mods_
 Ejemplo verificable: POD 30, coef 1,4, plano 12 (nivel 10 vs. nivel 10), DEF objetivo 80:
 
 ```
-daño_base = (30 × 1,4 + 12) × 1,18 = 55,2 × 1,18 = 65,1
-mitigación = 80 / (80 + 150) = 0,348
-daño_final = 65,1 × 0,652 = 42,4 → 42
+daño_base  = (30 × 1,4 + 12) × 1,18 = 54 × 1,18 = 63,72
+mitigación = 80 / (80 + 150) = 0,3478
+daño_final = 63,72 × 0,6522 = 41,56 → 42
 ```
+
+Este ejemplo es un caso de test del dominio: `DamageCalculator.resolver()` debe devolver
+`dano_final_entero = 42` con esos parámetros (ver `tests/domain/test_damage_calculator.gd`).
 
 ### 2.2 Mitigación por tipo
 
