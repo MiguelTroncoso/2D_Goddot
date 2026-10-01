@@ -2,9 +2,50 @@
 
 ## Phase 1: native Godot runner
 
-Phase 1 uses `tests/run_tests.gd`, a native `SceneTree` runner, without third-party
-addons. See [ADR-009](decisions/009-phase1-offline-composition.md). GUT remains the
-planned framework for future domain gameplay rules; it has **not** been installed.
+Phase 1 uses `tests/run_tests.gd`, a native `SceneTree` runner, for movement,
+JOYSTICK, collisions, camera and scene composition regressions. See
+[ADR-009](decisions/009-phase1-offline-composition.md).
+
+Since Phase 2 (TASK-003), domain gameplay rules run under **GUT 9.4.0**, vendored in
+`addons/gut/` (MIT) and registered in `CREDITS.md`. Version 9.4.0 is pinned because
+9.6.1 does not parse on Godot 4.4-stable and GUT ≥ 9.6 removed its coverage tool
+(see [ADR-011](decisions/011-gut-domain-testing.md)).
+
+### Domain suite (GUT)
+
+```sh
+godot --headless --path . -s addons/gut/gut_cmdln.gd \
+  -gdir=res://tests/domain -ginclude_subdirs -gexit
+```
+
+Current coverage of the domain suite (TASK-003):
+
+| Suite | Casos | Qué fija |
+|-------|-------|----------|
+| `test_xp_curve.gd` | 10 | Valores canónicos 1→150, acumulados, tipos de mob, diferencia de nivel |
+| `test_damage_calculator.gd` | 9 | Plano por tramo, factor de nivel, ejemplo canónico (42), crítico, PvP y penetración |
+| `test_mitigation_resolver.gd` | 6 | Curva DEF/(DEF+K), K por tipo, tope 75 %, penetración |
+| `test_crit_roller.gd` | 4 | Topes 50 % / 250 %, tirada determinista en el límite |
+| `test_stat_block.gd` | 8 | Curvas base, aportes de atributos, topes, validación, round-trip |
+| `test_enemy_archetype.gd` | 6 | Variantes, forzado de tipo umbrío, validación, XP |
+| `test_damage_types.gd` | 3 | Los tres tipos de daño |
+| `test_smoke.gd` | 2 | GUT operativo |
+
+### Domain API coverage gate
+
+GUT ≥ 9.6 no expone cobertura por línea desde la CLI, así que TASK-003 añade
+`tools/domain_coverage.py`: verifica que **cada función pública** de `src/domain/**/*.gd`
+esté referenciada por al menos un test. Umbral en CI: **≥ 80 %**.
+
+```sh
+python3 tools/domain_coverage.py --min 0.80 --verbose
+```
+
+Alcance declarado: es cobertura de **API**, no de líneas ni de ramas. El
+comportamiento lo valida la suite GUT; el gate evita que una función pública quede
+sin pruebas. Casos borde obligatorios: niveles 0/1/150/151, defensa ≤ 0, mitigación
+máxima, tirada crítica en el límite, topes de penetración y bono negativo, atributos
+negativos y variantes/patrones inválidos.
 
 Use the exact official **Godot 4.4-stable** (`4.4.stable.official.4c311cbee`). No
 engine migration is part of this phase. Python 3 standard library is sufficient

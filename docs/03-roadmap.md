@@ -73,6 +73,14 @@ prueba ocurra. Ver [Android development](08-android-development.md) y
 
 **Objective:** First complete game loop — fight, loot, level up.
 
+**Implementation status (2026-10-01):** iniciada con TASK-003 sobre `domain/` puro:
+tipos de daño, mitigación, críticos, fórmula de daño con desglose auditable, curva de
+XP 1–150, `StatBlock` y `EnemyArchetype`. Suite GUT 9.4.0 en verde (52 tests, 378
+asserts) y cobertura de API del dominio del 100 % (gate ≥ 80 % en CI). Pendiente del
+resto de la fase: entidades de escena, IA, loot, HUD de combate y primer set T1. La
+prueba física de Fase 1 sigue diferida en [TASK-002](plans/TASK-002.md) por
+[ADR-010](decisions/010-phase1-closure-exception.md).
+
 **Deliverables:**
 - Enemy entity with basic AI (idle, chase, attack)
 - Combat system (attack, damage, death) — logic in domain/
