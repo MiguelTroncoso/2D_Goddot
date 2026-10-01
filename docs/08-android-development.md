@@ -77,19 +77,39 @@ sigue siendo 1.8 y **no** debe usarse). Resultado de la auditoría:
 | Evidencia | Valor |
 |-----------|-------|
 | APK | `build/android/mmorpg-2d-debug.apk` |
-| Tamaño | 54.220.359 bytes (51,7 MB) |
-| `sha256` | `9389115024cf5be60fa6c6e4f5c0e1762bda70d85ed2db185d1b5db4fe000948` |
+| Tamaño | 54.292.434 bytes (51,8 MB) |
+| `sha256` | `c07a1cc65337a1e97035a9039c1ae1692280859d03f52498fa068f9c545a3cb5` |
 | Firma | Debug v2 verificada con `apksigner` |
 | Arquitecturas | `armeabi-v7a`, `arm64-v8a` |
 | Tests nativos | `PHASE1_TEST_RESULT: 50 checks, 0 failures` |
+| Contenido verificado | `assets/src/systems/` presente; `addons/`, `tests/`, `docs/` ausentes |
 
 Nota: el APK es reproducible **en procedimiento** (mismo preset y mismas entradas),
 pero no byte a byte: el empaquetado de Godot inserta timestamps, por lo que el
 `sha256` cambia entre builds con el mismo tamaño y contenido.
 
+### Filtro de exportación (regresión TASK-003.5)
+
+El preset debe usar `export_filter="all_resources"`. Con `export_filter="scenes"` el
+empaquetador incluye la escena listada y sus dependencias de escena, pero **no los
+`preload()` que están dentro de los scripts**: `src/systems/` quedó fuera del APK y el
+juego arrancó en dispositivo sin joystick ni movimiento. Ver
+[PHASE-1-REGRESSION.md](phase-reviews/PHASE-1-REGRESSION.md).
+
+Antes de exportar corren tres controles automáticos:
+
+```sh
+python3 tools/check_export_contract.py     # preset y exclusiones
+python3 tools/check_input_contract.py      # escenas y flags de input
+bash scripts/build_android.sh              # exporta y verifica el contenido del APK
+```
+
 **Pendiente único:** prueba física en dispositivo Android (`adb install -r`), con
-verificación de FPS sostenido ≥30, batería, safe area y cutouts. Ver
-[revisión de Fase 1](phase-reviews/PHASE-1.md).
+verificación del joystick dinámico, FPS sostenido ≥30, batería, safe area y cutouts. Los
+comandos y qué observar están en
+[PHASE-1-REGRESSION.md](phase-reviews/PHASE-1-REGRESSION.md) §6. La Fase 1 permanece
+**reabierta** hasta esa confirmación ([ADR-010](decisions/010-phase1-closure-exception.md)
+enmendado).
 
 CI validates engine import, scripts, main-scene startup and native tests. It does
 not install Android tooling, build an APK or claim device validation. Phase 1's

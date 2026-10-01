@@ -11,6 +11,10 @@ Since Phase 2 (TASK-003), domain gameplay rules run under **GUT 9.4.0**, vendore
 9.6.1 does not parse on Godot 4.4-stable and GUT ≥ 9.6 removed its coverage tool
 (see [ADR-011](decisions/011-gut-domain-testing.md)).
 
+Use the exact official **Godot 4.4-stable** (`4.4.stable.official.4c311cbee`). No
+engine migration is part of this phase. Python 3 standard library is sufficient
+for the wrapper; it invokes the engine, not a replacement parser.
+
 ### Domain suite (GUT)
 
 ```sh
@@ -35,7 +39,7 @@ Current coverage of the domain suite (TASK-003):
 
 GUT ≥ 9.6 no expone cobertura por línea desde la CLI, así que TASK-003 añade
 `tools/domain_coverage.py`: verifica que **cada función pública** de `src/domain/**/*.gd`
-esté referenciada por al menos un test. Umbral en CI: **≥ 80 %**.
+y `src/systems/**/*.gd` esté referenciada por al menos un test. Umbral en CI: **≥ 80 %**.
 
 ```sh
 python3 tools/domain_coverage.py --min 0.80 --verbose
@@ -47,9 +51,45 @@ sin pruebas. Casos borde obligatorios: niveles 0/1/150/151, defensa ≤ 0, mitig
 máxima, tirada crítica en el límite, topes de penetración y bono negativo, atributos
 negativos y variantes/patrones inválidos.
 
-Use the exact official **Godot 4.4-stable** (`4.4.stable.official.4c311cbee`). No
-engine migration is part of this phase. Python 3 standard library is sufficient
-for the wrapper; it invokes the engine, not a replacement parser.
+### Suite de presentación (regresión de input, TASK-003.5)
+
+`tests/presentation/test_joystick_regression.gd` cubre el camino real del sistema
+operativo, que la suite anterior evitaba:
+
+- el joystick existe, es visible y su anillo de reposo cae dentro de la pantalla;
+- la mitad derecha de la pantalla no lo activa;
+- un toque **en coordenadas de pantalla** (`push_input(evento, false)`) mueve al jugador
+  y lo detiene al soltar;
+- los contadores del panel de diagnóstico registran toques y arrastres.
+
+Complementa a `tests/run_tests.gd`, que inyecta toques en coordenadas locales del
+viewport y por eso no podía detectar errores de escala o de zona segura.
+
+```sh
+godot --headless --path . -s addons/gut/gut_cmdln.gd \
+  -gdir=res://tests/domain -gdir=res://tests/systems -gdir=res://tests/presentation \
+  -ginclude_subdirs -gexit
+```
+
+### Contrato de input táctil
+
+`tools/check_input_contract.py` verifica en CI y antes de cada build Android:
+orientación horizontal, flags de emulación táctil en `project.godot`, joystick `Control`
+a pantalla completa, joystick instanciado en el HUD, HUD instanciado en la escena
+principal y presencia del mapeo relativo en `systems/movement_input.gd`.
+
+```sh
+python3 tools/check_input_contract.py
+python3 tools/check_export_contract.py
+```
+
+### Contrato de exportación Android
+
+`tools/check_export_contract.py` exige `export_filter="all_resources"` y que el
+`exclude_filter` no tape código de runtime. Existe por la regresión TASK-003.5: con
+`export_filter="scenes"` los `preload()` de `src/systems/` no llegaban al APK y el juego
+arrancaba en el teléfono sin joystick ni movimiento. `scripts/build_android.sh` además
+inspecciona el APK generado y falla si falta `assets/src/systems/`.
 
 From the repository root:
 

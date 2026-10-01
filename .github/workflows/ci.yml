@@ -206,8 +206,14 @@ jobs:
               print(f'FAIL: {len(broken)} broken link(s) found out of {checked} checked')
               sys.exit(1)
           else:
-              print(f'All {checked} documentation cross-references valid')
+            print(f'All {checked} documentation cross-references valid')
           "
+
+      - name: Verify touch input contract
+        run: python3 tools/check_input_contract.py
+
+      - name: Verify Android export contract
+        run: python3 tools/check_export_contract.py
 
   godot:
     name: Godot 4.4 — parse, load and test
@@ -233,7 +239,8 @@ jobs:
         run: |
           GODOT="${{ runner.temp }}/godot-4.4/Godot_v4.4-stable_linux.x86_64"
           "$GODOT" --headless --path . -s addons/gut/gut_cmdln.gd \
-            -gdir=res://tests/domain -ginclude_subdirs -gexit | tee "${{ runner.temp }}/gut.log"
+            -gdir=res://tests/domain -gdir=res://tests/systems -gdir=res://tests/presentation \
+            -ginclude_subdirs -gexit | tee "${{ runner.temp }}/gut.log"
           grep -q "All tests passed" "${{ runner.temp }}/gut.log"
 
       - name: Domain API coverage (>= 80%)

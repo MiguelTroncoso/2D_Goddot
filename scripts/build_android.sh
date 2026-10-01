@@ -85,6 +85,15 @@ TEMPLATE_DIR="$HOME/Library/Application Support/Godot/export_templates/4.4.stabl
 [[ -d "$TEMPLATE_DIR" ]] || fail "faltan plantillas de exportación 4.4.stable en $TEMPLATE_DIR"
 [[ -f "$HOME/.android/debug.keystore" ]] || log "aviso: no hay ~/.android/debug.keystore; Godot intentará crearlo"
 
+# ---------------------------------------------------------------- Contrato de input
+# Evita publicar un APK si el editor reescribió project.godot y se perdieron los
+# flags de input táctil (regresión TASK-003.5).
+if command -v python3 >/dev/null 2>&1; then
+  log "verificando contrato de input táctil"
+  python3 "$ROOT/tools/check_input_contract.py" \
+    || fail "contrato de input táctil incompleto. Restaura project.godot: git update-index --no-skip-worktree project.godot && git restore project.godot && git update-index --skip-worktree project.godot"
+fi
+
 # ---------------------------------------------------------------- Export
 OUTPUT="${OUTPUT:-build/android/mmorpg-2d-debug.apk}"
 mkdir -p "$(dirname "$OUTPUT")"
@@ -103,6 +112,22 @@ fi
 
 # ---------------------------------------------------------------- Verificación
 "$APKSIGNER" verify --verbose "$OUTPUT" >/dev/null 2>&1 || fail "el APK no está firmado correctamente"
+
+# ---------------------------------------------------------------- Contenido del APK
+# Regresión TASK-003.5: con export_filter="scenes" los preload() de los scripts no
+# llegaban al paquete y el juego arrancaba sin joystick ni movimiento en Android.
+if command -v unzip >/dev/null 2>&1; then
+  log "verificando contenido del APK"
+  LISTADO="$(unzip -l "$OUTPUT")"
+  for requerido in "assets/src/main.gdc" "assets/src/systems/" "assets/src/ui/virtual_joystick.gdc"; do
+    printf '%s' "$LISTADO" | grep -q "$requerido" \
+      || fail "el APK no contiene '$requerido'. Revisa export_filter en export_presets.cfg (debe ser all_resources)"
+  done
+  if printf '%s' "$LISTADO" | grep -q "assets/addons/gut/"; then
+    log "aviso: el APK incluye addons/gut (revisar exclude_filter: no debería viajar a producción)"
+  fi
+fi
+
 SIZE_BYTES="$(stat -f%z "$OUTPUT" 2>/dev/null || stat -c%s "$OUTPUT")"
 SHA256="$(shasum -a 256 "$OUTPUT" | awk '{print $1}')"
 log "OK: $OUTPUT"

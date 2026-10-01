@@ -5,10 +5,12 @@ const MovementInput = preload("res://src/systems/movement_input.gd")
 var _touch_intent := Vector2.ZERO
 @onready var player = $World/Player
 @onready var joystick = $UI/HUD/VirtualJoystick
+@onready var hud = $UI/HUD
 
 
 func _ready() -> void:
 	joystick.movement_changed.connect(_on_touch_movement_changed)
+	hud.configurar_jugador(player)
 	player.get_node("Camera2D").reset_smoothing()
 
 
