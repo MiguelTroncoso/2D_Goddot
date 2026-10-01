@@ -2,10 +2,11 @@
 
 ## Status
 
-**Amended — 2026-10-01: Fase 1 REABIERTA.** La prueba física diferida reveló que el
-input táctil no funcionaba en dispositivo (`docs/phase-reviews/PHASE-1-REGRESSION.md`).
-La excepción queda revocada: Fase 1 no está cerrada y **no se apilan tareas de UI/input
-sobre ella** hasta la validación del PO ([ADR-012](012-ui-input-requires-device-validation.md)).
+**Closed with device validation — 2026-10-01 (TASK-005).** La excepción original fue
+revocada el mismo día al descubrirse que el input táctil no funcionaba
+([PHASE-1-REGRESSION.md](../phase-reviews/PHASE-1-REGRESSION.md)); tras corregir el
+filtro de exportación (TASK-003.5), el PO validó el APK en su teléfono y los cinco
+criterios se cumplieron. Ver la enmienda de cierre al final de este documento.
 
 ## Context
 
@@ -94,3 +95,24 @@ Lecciones incorporadas como reglas en [ADR-012](012-ui-input-requires-device-val
 **Criterio de reapertura y cierre de Fase 1:** el fix se considera cerrado solo cuando
 el PO confirme en su dispositivo los cinco puntos de
 [PHASE-1-REGRESSION.md](../phase-reviews/PHASE-1-REGRESSION.md) §5.
+
+## Amendment (2026-10-01, TASK-005) — Cierre con validación física
+
+El PO validó el APK corregido en su dispositivo. Evidencia:
+
+| Criterio | Resultado | Evidencia |
+|----------|-----------|-----------|
+| 1. Anillo de reposo visible, fuera de la muesca | ✅ | Capturas abajo; `safe L76` confirma el inset real de 76 px |
+| 2. Arrastre en la mitad izquierda mueve al personaje | ✅ | `joy (-0.98, 0.19) → vel (-235, 46)` y `joy (0.71, -0.71) → vel (170, -169)` |
+| 3. Al soltar se detiene | ✅ | Reporte del PO |
+| 4. WASD/flechas en escritorio | ✅ | `PHASE1_TEST_RESULT: 50 checks, 0 failures` (incluye teclado) |
+| 5. Sin `FATAL`/`Exception` | ✅ | Reporte del PO |
+
+| Captura | Qué muestra |
+|---------|-------------|
+| [device-01-joystick-izquierda.jpg](../phase-reviews/evidence/device-01-joystick-izquierda.jpg) | `FPS 117 · vp 1600x720 · win 2712x1220 · safe L76 · touch 1 · drag 432 · joy (-0.98, 0.19) · vel (-235, 46)` |
+| [device-02-joystick-arriba-derecha.jpg](../phase-reviews/evidence/device-02-joystick-arriba-derecha.jpg) | `FPS 120 · joy (0.71, -0.71) · vel (170, -169)` |
+
+**Lección permanente (ADR-012):** una excepción de validación no puede cubrir la única
+funcionalidad de una fase, y CI verde nunca sustituye la prueba de hardware para UI,
+input, orientación, *safe area* o rendimiento.

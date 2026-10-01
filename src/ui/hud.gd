@@ -13,21 +13,34 @@ const BASE_PISTA := Vector2(-230.0, -64.0)
 @onready var _fase: Label = $PhaseLabel
 @onready var _pista: Label = $ControlsHint
 @onready var _salud: ProgressBar = $HealthPanel/HealthPlaceholder
-@onready var _diagnostico: Label = $DiagnosticoLabel
 
 var _jugador: Node = null
 var _margenes: Dictionary = {"izquierda": 0.0, "arriba": 0.0, "derecha": 0.0, "abajo": 0.0}
-var _acumulador_diagnostico := 0.0
 
 
 func _ready() -> void:
 	get_viewport().size_changed.connect(_aplicar_zona_segura)
 	_aplicar_zona_segura()
+	_instalar_overlay_de_diagnostico()
+
+
+## El overlay solo existe en desarrollo o con el flag `game/debug_overlay`.
+## En release la escena no está exportada, así que nunca aparece (TASK-005).
+func _instalar_overlay_de_diagnostico() -> void:
+	var DebugOverlay = load("res://src/ui/debug_overlay.gd")
+	if not DebugOverlay.habilitado() or not DebugOverlay.escena_disponible():
+		return
+	var overlay := (load(DebugOverlay.RUTA_ESCENA) as PackedScene).instantiate()
+	add_child(overlay)
+	overlay.configurar(_joystick, _jugador)
 
 
 ## Enlace de contexto: el HUD solo lee del jugador para mostrar valores.
 func configurar_jugador(jugador: Node) -> void:
 	_jugador = jugador
+	for hijo in get_children():
+		if hijo.has_method("configurar"):
+			hijo.configurar(_joystick, _jugador)
 
 
 func _aplicar_zona_segura() -> void:
@@ -56,39 +69,5 @@ func _aplicar_zona_segura() -> void:
 	_pista.offset_top = BASE_PISTA.y - abajo
 	_pista.offset_bottom = BASE_PISTA.y + 32.0 - abajo
 
-	_diagnostico.offset_right = -48.0 - derecha
-	_diagnostico.offset_top = 96.0 + arriba
-	_diagnostico.offset_bottom = 226.0 + arriba
-
 	_joystick.set_margen_seguro(izquierda, abajo)
 
-
-func alternar_diagnostico() -> void:
-	_diagnostico.visible = not _diagnostico.visible
-
-
-func _process(delta: float) -> void:
-	_acumulador_diagnostico += delta
-	if _acumulador_diagnostico < 0.25 or not _diagnostico.visible:
-		return
-	_acumulador_diagnostico = 0.0
-	var ventana := DisplayServer.window_get_size()
-	var viewport := get_viewport().get_visible_rect().size
-	var velocidad := Vector2.ZERO
-	if is_instance_valid(_jugador):
-		velocidad = _jugador.velocity
-	_diagnostico.text = "\n".join([
-		"FPS %d · vp %dx%d · win %dx%d" % [
-			Engine.get_frames_per_second(), int(viewport.x), int(viewport.y), ventana.x, ventana.y
-		],
-		"safe L%d T%d R%d B%d" % [
-			int(_margenes["izquierda"]), int(_margenes["arriba"]),
-			int(_margenes["derecha"]), int(_margenes["abajo"]),
-		],
-		"touch %d · drag %d · último %s" % [
-			_joystick.eventos_touch, _joystick.eventos_drag, _joystick.ultimo_evento
-		],
-		"joy (%.2f, %.2f) · vel (%d, %d)" % [
-			_joystick.output.x, _joystick.output.y, int(velocidad.x), int(velocidad.y)
-		],
-	] as Array[String])

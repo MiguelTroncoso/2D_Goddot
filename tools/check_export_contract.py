@@ -19,6 +19,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PRESET = ROOT / "export_presets.cfg"
 RUTAS_CRITICAS = ("src/systems/", "src/domain/", "src/ui/", "src/entities/", "src/data/")
+OVERLAY = "src/ui/debug_overlay"
 
 
 def valor(texto: str, clave: str) -> str | None:
@@ -35,6 +36,18 @@ def main() -> int:
     exclusiones = (valor(texto, "exclude_filter") or "").split(",")
     exclusiones = [e.strip() for e in exclusiones if e.strip()]
     fallos: list[str] = []
+
+    presets = _presets(texto)
+    release = presets.get("Android Release")
+    debug = presets.get("Android Debug")
+    if release is None:
+        fallos.append("falta el preset 'Android Release' (TASK-005)")
+    else:
+        exclusion_release = release.get("exclude_filter", "")
+        if OVERLAY not in exclusion_release:
+            fallos.append("el preset 'Android Release' debe excluir src/ui/debug_overlay* (no debe viajar a producción)")
+    if debug is not None and "debug_overlay" in debug.get("exclude_filter", ""):
+        fallos.append("el preset 'Android Debug' debe incluir el overlay de diagnóstico")
 
     if filtro != "all_resources":
         fallos.append(
@@ -55,6 +68,27 @@ def main() -> int:
         return 1
     print(f"PASS: contrato de exportación (filtro '{filtro}', exclusiones: {', '.join(exclusiones)})")
     return 0
+
+
+def _presets(texto: str) -> dict[str, dict[str, str]]:
+    """Separa export_presets.cfg por preset y devuelve un diccionario por nombre."""
+    por_indice: dict[str, dict[str, str]] = {}
+    indice_actual: str | None = None
+    for linea in texto.splitlines():
+        coincidencia = re.match(r"\[preset\.(\d+)(\.options)?\]", linea.strip())
+        if coincidencia:
+            indice_actual = coincidencia.group(1)
+            por_indice.setdefault(indice_actual, {})
+            continue
+        if "=" not in linea or indice_actual is None:
+            continue
+        clave, valor = linea.split("=", 1)
+        por_indice[indice_actual][clave.strip()] = valor.strip().strip('"')
+    return {
+        datos["name"]: datos
+        for datos in por_indice.values()
+        if datos.get("name")
+    }
 
 
 if __name__ == "__main__":

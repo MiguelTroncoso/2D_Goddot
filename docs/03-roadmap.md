@@ -23,7 +23,11 @@
 
 ---
 
-## Phase 1 — Offline Movement & Controls Foundation (current)
+## Phase 1 — Offline Movement & Controls Foundation — ✅ CERRADA (2026-10-01)
+
+**Estado: cerrada con validación física en dispositivo** (TASK-005). Evidencia en
+[PHASE-1.md](phase-reviews/PHASE-1.md) y
+[ADR-010](decisions/010-phase1-closure-exception.md). Tag: `fase-1-complete`.
 
 **Objective:** A single-player offline prototype with core movement, controls, and Android export.
 

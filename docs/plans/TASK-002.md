@@ -1,7 +1,9 @@
 # TASK-002 — Prueba física del APK en dispositivo Android
 
-> **Estado: `deferred, no bloquea Fase 2`** (ver [ADR-010](../decisions/010-phase1-closure-exception.md)).
-> Responsable de ejecución: Product Owner (requiere hardware). Duración estimada: 45–60 min.
+> **Estado: ✅ `closed` — validado por el PO el 2026-10-01** ([ADR-010](../decisions/010-phase1-closure-exception.md)).
+> Evidencia: joystick funcional (`joy (-0.98, 0.19) → vel (-235, 46)`; `joy (0.71, -0.71) → vel (170, -169)`),
+> FPS 117–120, `safe L76`, capturas en `docs/phase-reviews/evidence/`.
+> Fue `deferred` entre TASK-001 y TASK-003.5; la regresión de input demostró que diferirlo fue un error.
 
 ## Objetivo
 
