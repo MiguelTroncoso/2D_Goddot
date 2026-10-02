@@ -77,7 +77,14 @@ prueba ocurra. Ver [Android development](08-android-development.md) y
 
 **Objective:** First complete game loop — fight, loot, level up.
 
-**Implementation status (2026-10-01, actualizado):** **en pausa**. El PO probó el APK de
+**Implementation status (2026-10-02):** **en curso — TASK-004 ✅ (núcleo de combate),
+falta TASK-004.1 (6 patrones de IA restantes y más mobs).** El bucle offline está completo:
+el jugador ataca, la IA de 3 patrones reacciona, los mobs mueren, sueltan botín y otorgan XP
+con la curva canónica; 101 tests GUT y 50 checks nativos en verde, cobertura de API del
+99,1 % en `domain/` + `systems/`. Queda pendiente la validación física del bucle
+(ADR-012). Ver [TASK-004](plans/TASK-004.md).
+
+**Antecedente (2026-10-01):** el PO probó el APK de
 Fase 1 en su teléfono y el input táctil no funcionaba; la Fase 1 se reabre
 ([ADR-010](decisions/010-phase1-closure-exception.md) enmendado) y TASK-003.5 corrige el
 joystick dinámico, la zona segura y añade verificación en dispositivo

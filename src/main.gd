@@ -69,7 +69,8 @@ func _spawnear_enemigos() -> void:
 		$World.add_child(enemigo)
 		_enemigos.append(enemigo)
 		_combat.registrar_actor(
-			_id_de(enemigo), &"enemigo", definicion.arquetipo().stat_block(), enemigo.vida_max
+			_id_de(enemigo), &"enemigo", definicion.arquetipo().stat_block(),
+			enemigo.vida_max, enemigo.vida_max
 		)
 
 

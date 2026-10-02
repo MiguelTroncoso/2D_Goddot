@@ -32,14 +32,16 @@ func registrar_actor(
 	id: StringName,
 	bando: StringName,
 	stats: StatBlock,
-	vida_inicial: float = -1.0
+	vida_inicial: float = -1.0,
+	vida_maxima: float = -1.0
 ) -> void:
-	var vida := vida_inicial if vida_inicial >= 0.0 else float(stats.vida_max())
+	var maxima := vida_maxima if vida_maxima > 0.0 else float(stats.vida_max())
+	var vida := vida_inicial if vida_inicial >= 0.0 else maxima
 	_actores[id] = {
 		"bando": bando,
 		"stats": stats,
 		"vida": vida,
-		"vida_max": float(stats.vida_max()),
+		"vida_max": maxima,
 	}
 
 
@@ -127,6 +129,10 @@ func atacar(
 	tiempo: float = 0.0
 ) -> Dictionary:
 	var habilidad: StringName = datos.get("habilidad", &"basico")
+	if atacante_id == objetivo_id:
+		# Un ataque nunca pega a quien lo lanza; el daño propio (DoT, entorno)
+		# entra por `aplicar_dano`, no por `atacar`.
+		return _fallo("self_target", atacante_id, objetivo_id, habilidad)
 	if not esta_vivo(atacante_id):
 		return _fallo("atacante_no_disponible", atacante_id, objetivo_id, habilidad)
 	if not esta_vivo(objetivo_id):
@@ -142,6 +148,8 @@ func atacar(
 	var atacante := stats(atacante_id)
 	var objetivo := stats(objetivo_id)
 	var mods_pvp := float(datos.get("mods_pvp", 0.6 if _es_pvp(atacante_id, objetivo_id) else 1.0))
+	# La tirada puede inyectarse para tests y repeticiones deterministas del servidor.
+	var tirada: float = float(datos["tirada_critico"]) if datos.has("tirada_critico") else _rng.randf()
 	var golpe := {
 		"pod": atacante.pod_total(),
 		"coef": float(datos.get("coef", 1.0)),
@@ -155,7 +163,7 @@ func atacar(
 		"mods_pvp": mods_pvp,
 		"critico_base": atacante.critico(),
 		"dano_critico_extra": atacante.multiplicador_critico() - CritRoller.MULTIPLICADOR_BASE,
-		"tirada_critico": _rng.randf(),
+		"tirada_critico": tirada,
 	}
 	if datos.has("plano"):
 		golpe["plano"] = float(datos["plano"])
