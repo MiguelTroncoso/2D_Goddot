@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/item_definition.gd" id="1_24vq8"]
+
+[resource]
+script = ExtResource("1_24vq8")
+id = &"pocion_savia_menor"
+nombre = "Poción de savia menor"
+tipo = "consumible"
+rareza = "comun"
+nivel = 1
+precio_base = 40
+stack_max = 20
+descripcion = "Cura 30 % de la Vida máxima."
+efecto = {
+"cooldown_s": 30.0,
+"curacion_pct": 0.3
+}

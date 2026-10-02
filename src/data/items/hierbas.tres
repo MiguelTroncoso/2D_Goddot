@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/item_definition.gd" id="1_xve8o"]
+
+[resource]
+script = ExtResource("1_xve8o")
+id = &"hierbas"
+nombre = "Hierbas"
+tipo = "material"
+rareza = "comun"
+nivel = 1
+precio_base = 5
+stack_max = 99
+descripcion = "Hierbas de terraza, base de pociones y té."
+efecto = {}

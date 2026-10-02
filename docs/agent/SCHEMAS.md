@@ -95,5 +95,56 @@ Los `.tres` son contenedores de los diccionarios anteriores; el dominio nunca lo
 | `SetDefinition` | `src/data/sets/<tramo>_<clase>.tres` | 6 piezas + bonos 2/4/6 |
 | `EventDefinition` | `src/data/events/<id>.tres` | Cadencia, formato, franjas UTC, recompensas, límite diario |
 
+## 5. `CombatResult` (`CombatSystem.atacar`)
+
+Salida de un ataque resuelto. Todos los campos del desglose son obligatorios
+(los tests verifican la lista completa):
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `exito` | bool | `false` si el ataque se rechazó; en ese caso solo hay `razon` |
+| `razon` | String | `self_target`, `atacante_no_disponible`, `objetivo_no_disponible`, `en_enfriamiento` |
+| `atacante` / `objetivo` | StringName | Identificadores de los actores |
+| `habilidad` | StringName | Identificador usado para el cooldown |
+| `dano` | float | Daño efectivo aplicado |
+| `dano_entero` | int | Daño redondeado para UI y telemetría |
+| `tipo` | StringName | `fisico`, `resonante`, `umbrio` |
+| `es_critico` | bool | Resultado de la tirada |
+| `mitigacion` | float | Mitigación efectiva aplicada (0–0,75) |
+| `vida_antes` / `vida_restante` | float | Estado del objetivo antes y después |
+| `objetivo_derrotado` | bool | `true` si la Vida llegó a 0 |
+| `desglose` | Dictionary | Salida completa de `DamageCalculator.resolver` |
+
+`desglose` contiene: `pod`, `coef`, `plano`, `nivel_lanzador`, `nivel_objetivo`, `tipo`,
+`factor_nivel`, `dano_base`, `defensa_efectiva`, `mitigacion`, `bono_negativo`, `mods_estado`,
+`mods_pvp`, `es_critico`, `multiplicador_critico`, `dano_final`, `dano_final_entero`.
+
+## 6. `MobData` (`data/mobs/*.tres` → `MobDefinition`)
+
+| Campo | Tipo | Rango/valores | Notas |
+|-------|------|---------------|-------|
+| `id` | StringName | único | Estable y append-only |
+| `nombre` | String | — | Se muestra en el HUD de combate |
+| `familia` | StringName | 16 familias del GDD | Define la tabla de botín por respaldo |
+| `variante` | String | `joven`, `adulto`, `ancestral`, `primigenio`, `umbrio`, `elite` | Multiplica Vida y daño |
+| `nivel` | int | 1–150 | Define tramo, cobre y XP |
+| `tipo_dano` | String | `fisico`, `resonante`, `umbrio` | La variante umbría lo fuerza |
+| `vida_base` | float | > 0 | Vida de la variante `joven` (base del tramo) |
+| `defensa_base` | float | ≥ 0 | Se mapea a `StatBlock.defensa_extra` |
+| `velocidad` | float | > 0 | Casillas/s |
+| `patron_ia` | String | 12 valores; **solo 3 implementados** | Ver `AiPatterns` |
+| `radio_deteccion` / `radio_agarre` / `radio_ataque` | float | > 0 | Radios en casillas |
+| `tipo_mob` | String | 7 tipos | Multiplicador de XP y cobre |
+| `coef_ataque` / `cooldown_ataque` | float | > 0 | Ataque básico de la criatura |
+| `botin` | Array[Dictionary] | — | `{item_id, probabilidad, cantidad_min, cantidad_max}` |
+| `color_placeholder` / `escala` | Color / float | — | Presentación provisional |
+
+### `ItemData` (`data/items/*.tres` → `ItemDefinition`)
+
+| Campo | Tipo | Notas |
+|-------|------|-------|
+| `id`, `nombre`, `tipo`, `rareza`, `nivel`, `precio_base`, `stack_max`, `descripcion` | — | Datos base |
+| `efecto` | Dictionary | Consumibles: `curacion_pct`, `limpia`, `duracion_s`, `bonus`, `teleporte`, `cooldown_s` |
+
 Validación: cada recurso expone `validar() -> Array[String]` en su tipo de dominio asociado
 (`StatBlock.validar()`, `EnemyArchetype.validar()`), y los tests de datos deben exigir lista vacía.

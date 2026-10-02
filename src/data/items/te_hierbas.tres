@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/item_definition.gd" id="1_aamc5"]
+
+[resource]
+script = ExtResource("1_aamc5")
+id = &"te_hierbas"
+nombre = "Té de hierbas amargas"
+tipo = "consumible"
+rareza = "comun"
+nivel = 1
+precio_base = 30
+stack_max = 20
+descripcion = "Limpia quemadura y zumbido."
+efecto = {
+"cooldown_s": 20.0,
+"limpia": [&"quemadura", &"zumbido"]
+}

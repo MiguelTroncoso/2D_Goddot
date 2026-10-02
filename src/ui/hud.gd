@@ -39,7 +39,9 @@ func _instalar_overlay_de_diagnostico() -> void:
 func configurar_jugador(jugador: Node) -> void:
 	_jugador = jugador
 	for hijo in get_children():
-		if hijo.has_method("configurar"):
+		# Solo el overlay de diagnóstico recibe (joystick, jugador); el HUD de combate
+		# se configura desde `main.gd` con su propia firma.
+		if hijo.name == "DebugOverlay" and hijo.has_method("configurar"):
 			hijo.configurar(_joystick, _jugador)
 
 
@@ -70,4 +72,3 @@ func _aplicar_zona_segura() -> void:
 	_pista.offset_bottom = BASE_PISTA.y + 32.0 - abajo
 
 	_joystick.set_margen_seguro(izquierda, abajo)
-

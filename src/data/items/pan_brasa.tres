@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/item_definition.gd" id="1_chqqd"]
+
+[resource]
+script = ExtResource("1_chqqd")
+id = &"pan_brasa"
+nombre = "Pan de brasa"
+tipo = "consumible"
+rareza = "comun"
+nivel = 1
+precio_base = 25
+stack_max = 20
+descripcion = "Cura 15 % de la Vida máxima, solo fuera de combate."
+efecto = {
+"curacion_pct": 0.15,
+"fuera_de_combate": true
+}

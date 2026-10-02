@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="MobDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/mob_definition.gd" id="1_yukda"]
+
+[resource]
+script = ExtResource("1_yukda")
+id = &"cuervo_campana_joven"
+nombre = "Cuervo de campana joven"
+familia = &"cuervo_campana"
+variante = "joven"
+nivel = 5
+tipo_dano = "fisico"
+vida_base = 22.0
+defensa_base = 3.0
+velocidad = 4.2
+patron_ia = "patrulla"
+radio_deteccion = 6.0
+radio_agarre = 12.0
+radio_ataque = 1.6
+tipo_mob = "comun"
+contribucion_minima = 0.1
+coef_ataque = 0.9
+cooldown_ataque = 1.4
+botin = Array[Dictionary]([{
+"cantidad_max": 2,
+"cantidad_min": 1,
+"item_id": &"fibra",
+"probabilidad": 0.45
+}, {
+"cantidad_max": 1,
+"cantidad_min": 1,
+"item_id": &"pan_brasa",
+"probabilidad": 0.2
+}])
+color_placeholder = Color(0.24, 0.27, 0.34, 1)
+escala = 0.85
