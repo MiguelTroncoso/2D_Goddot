@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/item_definition.gd" id="1_c483r"]
+
+[resource]
+script = ExtResource("1_c483r")
+id = &"fibra"
+nombre = "Fibra"
+tipo = "material"
+rareza = "comun"
+nivel = 1
+precio_base = 4
+stack_max = 99
+descripcion = "Material textil básico del Prado de Senda."
+efecto = {}

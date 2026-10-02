@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="MobDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/mob_definition.gd" id="1_q71vb"]
+
+[resource]
+script = ExtResource("1_q71vb")
+id = &"enredadera_emboscada"
+nombre = "Enredadera emboscada"
+familia = &"enredadera"
+variante = "joven"
+nivel = 10
+tipo_dano = "resonante"
+vida_base = 40.0
+defensa_base = 10.0
+velocidad = 1.0
+patron_ia = "pasivo"
+radio_deteccion = 3.5
+radio_agarre = 4.0
+radio_ataque = 2.2
+tipo_mob = "comun"
+contribucion_minima = 0.1
+coef_ataque = 1.1
+cooldown_ataque = 1.4
+botin = Array[Dictionary]([{
+"cantidad_max": 3,
+"cantidad_min": 1,
+"item_id": &"hierbas",
+"probabilidad": 0.55
+}, {
+"cantidad_max": 1,
+"cantidad_min": 1,
+"item_id": &"te_hierbas",
+"probabilidad": 0.2
+}])
+color_placeholder = Color(0.38, 0.52, 0.28, 1)
+escala = 1.2

@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="ItemDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/item_definition.gd" id="1_8txrn"]
+
+[resource]
+script = ExtResource("1_8txrn")
+id = &"elixir_lumbre"
+nombre = "Elixir de lumbre"
+tipo = "consumible"
+rareza = "resonante"
+nivel = 5
+precio_base = 120
+stack_max = 10
+descripcion = "+10 % de daño y +5 % de curación durante 20 minutos."
+efecto = {
+"bonus": {
+"curacion_pct": 0.05,
+"dano_pct": 0.1
+},
+"duracion_s": 1200.0
+}

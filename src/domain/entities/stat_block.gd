@@ -44,6 +44,8 @@ var celeridad_extra: float = 0.0
 var tenacidad_extra: float = 0.0
 var penetracion_extra: float = 0.0
 var velocidad_extra: float = 0.0
+## Defensa adicional aportada por datos de criatura o equipo (no por atributos).
+var defensa_extra: float = 0.0
 
 
 ## Bloque vacío del nivel indicado (atributos en cero, sin equipo).
@@ -67,6 +69,7 @@ static func desde_diccionario(datos: Dictionary) -> StatBlock:
 	bloque.tenacidad_extra = float(datos.get("tenacidad_extra", 0.0))
 	bloque.penetracion_extra = float(datos.get("penetracion_extra", 0.0))
 	bloque.velocidad_extra = float(datos.get("velocidad_extra", 0.0))
+	bloque.defensa_extra = float(datos.get("defensa_extra", 0.0))
 	return bloque
 
 
@@ -83,6 +86,7 @@ func a_diccionario() -> Dictionary:
 		"tenacidad_extra": tenacidad_extra,
 		"penetracion_extra": penetracion_extra,
 		"velocidad_extra": velocidad_extra,
+		"defensa_extra": defensa_extra,
 	}
 
 
@@ -116,7 +120,7 @@ func def_base() -> float:
 
 ## Defensa con atributos: +2 por punto de Vigor por encima del umbral 20.
 func def_total() -> float:
-	return def_base() + DEF_POR_VIGOR * float(maxi(0, vigor - VIGOR_UMBRAL_DEF))
+	return def_base() + DEF_POR_VIGOR * float(maxi(0, vigor - VIGOR_UMBRAL_DEF)) + maxf(0.0, defensa_extra)
 
 
 func reserva_max() -> int:

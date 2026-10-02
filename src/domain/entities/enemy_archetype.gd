@@ -132,6 +132,14 @@ func xp() -> int:
 	return XpCurve.xp_criatura(nivel, tipo_mob)
 
 
+## Bloque de estadísticas equivalente para el combate autoritativo.
+## La Vida se pasa aparte (`vida_base` × variante) al registrar el actor.
+func stat_block() -> StatBlock:
+	var bloque := StatBlock.base(nivel)
+	bloque.defensa_extra = maxf(0.0, defensa_base - bloque.def_base())
+	return bloque
+
+
 ## Validación de datos para el pipeline de `data/`. Lista vacía si el arquetipo es válido.
 func validar() -> Array[String]:
 	var problemas: Array[String] = []

@@ -1,0 +1,36 @@
+[gd_resource type="Resource" script_class="MobDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/data/mob_definition.gd" id="1_q5h2j"]
+
+[resource]
+script = ExtResource("1_q5h2j")
+id = &"mordeluz_adulto"
+nombre = "Mordeluz adulto"
+familia = &"mordeluz"
+variante = "adulto"
+nivel = 6
+tipo_dano = "fisico"
+vida_base = 26.0
+defensa_base = 4.0
+velocidad = 3.6
+patron_ia = "agresivo"
+radio_deteccion = 6.0
+radio_agarre = 12.0
+radio_ataque = 1.6
+tipo_mob = "comun"
+contribucion_minima = 0.1
+coef_ataque = 0.9
+cooldown_ataque = 1.4
+botin = Array[Dictionary]([{
+"cantidad_max": 3,
+"cantidad_min": 1,
+"item_id": &"fibra",
+"probabilidad": 0.65
+}, {
+"cantidad_max": 2,
+"cantidad_min": 1,
+"item_id": &"cuero",
+"probabilidad": 0.3
+}])
+color_placeholder = Color(0.62, 0.33, 0.26, 1)
+escala = 1.1
